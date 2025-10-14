@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Usuários</title>
+</head>
+<body>
+    <h1>Usuários cadastrados</h1>
+
+    <% if (data.length === 0) { %>
+        <p>Nenhum usuário encontrado.</p>
+    <% } else { %>
+        <table border="1" cellpadding="5" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Senha</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% data.forEach(user => { %>
+                    <tr>
+                        <td><%= user[0] %></td>
+                        <td><%= user[1] %></td>
+                        <td><%= user[2] %></td>
+                        <td><%= user[3] %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } %>
+</body>
+</html>
