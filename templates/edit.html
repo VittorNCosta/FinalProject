@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Tarefa</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_form.css') }}">
+</head>
+<body>
+  <header>
+    <h1>Editar Tarefa</h1>
+  </header>
+
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('tarefa.edit', id=tarefa['id']) }}" method="POST" class="tarefa-form">
+      <div class="form-group">
+        <label for="titulo">Título:</label>
+        <input type="text" name="titulo" id="titulo" value="{{ tarefa['titulo'] }}" required>
+      </div>
+
+      <div class="form-group">
+        <label for="descricao">Descrição:</label>
+        <textarea name="descricao" id="descricao" rows="4" required>{{ tarefa['descricao'] }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status:</label>
+        <select name="status" id="status" required>
+          <option value="Pendente" {% if tarefa['status'] == 'Pendente' %}selected{% endif %}>Pendente</option>
+          <option value="Concluída" {% if tarefa['status'] == 'Concluída' %}selected{% endif %}>Concluída</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="prioridade">Prioridade:</label>
+        <select name="prioridade" id="prioridade" required>
+          <option value="Baixa" {% if tarefa['prioridade'] == 'Baixa' %}selected{% endif %}>Baixa</option>
+          <option value="Média" {% if tarefa['prioridade'] == 'Média' %}selected{% endif %}>Média</option>
+          <option value="Alta" {% if tarefa['prioridade'] == 'Alta' %}selected{% endif %}>Alta</option>
+        </select>
+      </div>
+<!--
+      <div class="form-group">
+        <label for="data_criacao">Horário de Criação:</label>
+        <input type="datetime-local" name="data_criacao" id="data_criacao" value="{{ tarefa['data_criacao']|replace(' ', 'T') }}" required>
+      </div>
+-->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-add">Atualizar Tarefa</button>
+        <a href="{{ url_for('tarefa.home') }}" class="btn btn-delete">Cancelar</a>
+      </div>
+    </form>
+  </main>
+
+  <footer>
+    <p>Gerenciador de Tarefas - APS-1</p>
+  </footer>
+</body>
+</html>
