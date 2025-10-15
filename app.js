@@ -4,40 +4,44 @@ const multer = require("multer");
 const { criarPool, getConnection, uploadsDir, serverConfig } = require("./config");
 
 const app = express();
-let pool; // Pool global
+let pool; 
 
-// ===== Configuração do EJS =====
+
 app.set("views", path.join(process.cwd(), "views", "templates"));
 app.set("view engine", "ejs");
 
-// ===== Middlewares =====
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(process.cwd(), "public")));
 
-// ===== Upload de arquivos =====
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 const upload = multer({ storage, limits: { fileSize: serverConfig.maxFileSize } });
 
-// ===== Rotas =====
+
 app.get("/", async (req, res) => {
   let conn;
   try {
     conn = await getConnection(pool);
     let result = [];
     if (conn) {
-      const query = await conn.execute(`SELECT * FROM users`); 
-      result = query.rows;
+      const query = await conn.execute(`SELECT us_id, us_name, us_email FROM users`); 
+      result = query.rows.map(row => ({
+        us_id: row[0],
+        us_name: row[1], 
+        us_email: row[2]
+      }));
     }
     res.render("index", { data: result });
   } catch (err) {
     console.error(err);
     res.status(500).send("Erro ao carregar a página");
   } finally {
-    if (conn) await conn.close(); // devolve a conexão ao pool
+    if (conn) await conn.close(); 
   }
 });
 
@@ -49,7 +53,6 @@ app.post("/upload", upload.single("file"), (req, res) => {
   }
 });
 
-// ===== Inicialização do servidor e pool =====
 (async () => {
   pool = await criarPool();
   if (!pool) {

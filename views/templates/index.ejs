@@ -16,16 +16,14 @@
                     <th>ID</th>
                     <th>Nome</th>
                     <th>Email</th>
-                    <th>Senha</th>
                 </tr>
             </thead>
             <tbody>
                 <% data.forEach(user => { %>
                     <tr>
-                        <td><%= user[0] %></td>
-                        <td><%= user[1] %></td>
-                        <td><%= user[2] %></td>
-                        <td><%= user[3] %></td>
+                        <td><%= user.us_id %></td>
+                        <td><%= user.us_name %></td>
+                        <td><%= user.us_email %></td>
                     </tr>
                 <% }) %>
             </tbody>
