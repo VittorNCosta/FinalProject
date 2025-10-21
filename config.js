@@ -5,7 +5,7 @@ const path = require("path");
 const dbConfig = {
   user: "popflix",
   password: "vnc123",
-  connectString: "localhost:1521/XEPDB1",
+  connectString: "10.154.20.70:1521/XEPDB1",
 };
 
 // Criação do pool
