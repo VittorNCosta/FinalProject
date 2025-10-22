@@ -23,6 +23,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage, limits: { fileSize: serverConfig.maxFileSize } });
 
 
+const usersController = require("./controllers/users_controller"); // import do controller
+
+app.use("/", usersController); // todas as rotas do controller
+
+
+/*
 app.get("/", async (req, res) => {
   let conn;
   try {
@@ -44,6 +50,8 @@ app.get("/", async (req, res) => {
     if (conn) await conn.close(); 
   }
 });
+*/
+
 
 app.post("/upload", upload.single("file"), (req, res) => {
   if (req.file) {
