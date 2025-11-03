@@ -36,7 +36,7 @@ app.get("/", async (req, res) => {
         us_email: row[2]
       }));
     }
-    res.render("index", { data: result });
+    res.render("home", { data: result });
   } catch (err) {
     console.error(err);
     res.status(500).send("Erro ao carregar a página");
