@@ -1,14 +1,21 @@
 const express = require("express");
+const { criarPool } = require("../config");
+const UsersModel = require("../models/users_model");
+
 const router = express.Router();
-const { getAllUsers } = require("../models/users_model");
-const { pool } = require("../app"); // ou importe seu pool se estiver exportando
+let pool;
+
+// Inicializa o pool uma única vez, quando o módulo é carregado
+(async () => {
+  pool = await criarPool();
+})();
 
 router.get("/", async (req, res) => {
   try {
-    const users = await getAllUsers(pool);
-    res.render("index", { data: users });
+    const users = await UsersModel.getAllUsers(pool);
+    res.render("templates/home", { data: users });
   } catch (err) {
-    console.error(err);
+    console.error("Erro ao carregar usuários:", err);
     res.status(500).send("Erro ao carregar a página");
   }
 });

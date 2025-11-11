@@ -1,4 +1,6 @@
+
 // src/controllers/filmesController.js
+/*
 import * as FilmeModel from "../models/filmeModel.js";
 
 export async function listarFilmes(req, res) {
@@ -102,3 +104,4 @@ export async function excluirFilme(req, res) {
   }
 }
 
+*/

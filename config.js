@@ -5,47 +5,42 @@ const path = require("path");
 const dbConfig = {
   user: "popflix",
   password: "vnc123",
-  connectString: "10.154.20.70:1521/XEPDB1",
+  connectString: "10.154.51.12:1521/XEPDB1",
 };
 
-// Criação do pool
 async function criarPool() {
   try {
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin: 2,       // mínimo de conexões abertas
-      poolMax: 10,      // máximo de conexões
-      poolIncrement: 1, // incrementa quando necessário
+      poolMin: 2,
+      poolMax: 10,
+      poolIncrement: 1,
     });
-    console.log("Pool de conexões criado com sucesso!");
+    console.log("✅ Pool de conexões criado com sucesso!");
     return pool;
   } catch (err) {
-    console.error("Erro ao criar pool de conexões:", err);
+    console.error("❌ Erro ao criar pool de conexões:", err);
     return null;
   }
 }
 
-// Função para pegar conexão do pool
 async function getConnection(pool) {
   try {
+    if (!pool) throw new Error("Pool não foi inicializado!");
     const conn = await pool.getConnection();
     return conn;
   } catch (err) {
-    console.error("Erro ao obter conexão do pool:", err);
+    console.error("❌ Erro ao obter conexão do pool:", err);
     return null;
   }
 }
 
-// Chave secreta para sessão
 const sessionSecret = crypto.randomBytes(16).toString("hex");
-
-// Pasta de uploads
 const uploadsDir = path.join(process.cwd(), "uploads");
 
-// Configurações adicionais
 const serverConfig = {
   port: 8088,
-  maxFileSize: 5 * 1024 * 1024, // 5MB
+  maxFileSize: 5 * 1024 * 1024,
 };
 
 module.exports = {

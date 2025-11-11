@@ -1,3 +1,5 @@
+
+/*
 import { getConnection } from "../config.js";
 
 export async function getCinemas() {
@@ -76,3 +78,4 @@ export async function deleteCinema(id) {
     await conn.close();
   }
 }
+*/
