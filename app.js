@@ -1,15 +1,12 @@
 const express = require("express");
-const path = require("path");
-const multer = require("multer");
-const { criarPool, getConnection, uploadsDir, serverConfig } = require("./config");
+const { criarPool, serverConfig } = require("./config");
+const usersController = require("./controllers/users_controller");
 
 const app = express();
-let pool; 
-
-
-app.set("views", path.join(process.cwd(), "views", "templates"));
 app.set("view engine", "ejs");
 
+<<<<<<< HEAD
+=======
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -53,12 +50,13 @@ app.post("/upload", upload.single("file"), (req, res) => {
   }
 });
 
+>>>>>>> ce6046c15241a71274e8aadf09dd4271b5ef0db4
 (async () => {
-  pool = await criarPool();
-  if (!pool) {
-    console.error("Não foi possível iniciar o servidor sem o pool.");
-    process.exit(1);
-  }
+  const pool = await criarPool(); // cria e aguarda o pool
+  console.log("✅ Pool de conexões criado com sucesso!");
+
+  // Passa o pool para o controller (note os parênteses)
+  app.use("/", usersController);
 
   app.listen(serverConfig.port, () => {
     console.log(`Servidor rodando em http://localhost:${serverConfig.port}`);

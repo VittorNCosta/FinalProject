@@ -1,4 +1,5 @@
 // src/controllers/cinemasController.js
+/*
 import {
   getCinemas,
   getCinemaById,
@@ -72,3 +73,4 @@ export async function excluirCinema(req, res) {
     res.status(500).json({ message: "Erro ao excluir cinema." });
   }
 }
+*/

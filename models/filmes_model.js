@@ -1,4 +1,4 @@
-import { getConnection } from "../config/db.js";
+/*import { getConnection } from "../config/db.js";
 
 export async function getFilmes() {
   const conn = await getConnection();
@@ -98,3 +98,4 @@ export async function deletarFilme(id) {
     await conn.close();
   }
 }
+*/
