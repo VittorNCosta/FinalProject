@@ -1,81 +1,102 @@
+const { getConnection } = require("../config"); // função de conexão
 
-/*
-import { getConnection } from "../config.js";
-
-export async function getCinemas() {
-  const conn = await getConnection();
+/**
+ * Retorna todos os usuários do banco Oracle
+ * @param {Pool} pool - pool de conexões Oracle
+ * @returns {Promise<Array>}
+ */
+async function getAllCinemas(pool) {
+  let conn;
   try {
-    const result = await conn.execute(`
-      SELECT ID, NOME, ENDERECO, FOTO_URL
-      FROM CINEMAS
-      ORDER BY NOME`);
-    return result.rows;
+    conn = await getConnection(pool); // ✅ usa o helper corretamente
+    const query = await conn.execute(
+      `SELECT id, name, address FROM cinemas`
+    );
+
+    // Mapear os resultados do Oracle para objetos JS
+    return query.rows.map(row => ({
+      id: row[0],
+      name: row[1],
+      address: row[2],
+    }));
+  } catch (err) {
+    console.error("Erro no model getAllCinemas:", err);
+    throw err;
   } finally {
-    await conn.close();
+    if (conn) await conn.close();
   }
 }
 
-export async function getCinemaById(id) {
-  const conn = await getConnection();
+/**
+ * Busca cinema por ID
+ */
+async function getCinemaById(pool, id) {
+  let conn;
   try {
+    conn = await getConnection(pool);
     const result = await conn.execute(
-      `
-      SELECT ID, NOME, ENDERECO, FOTO_URL
-      FROM CINEMAS
-      WHERE ID = :id`,
+      `SELECT id, name, address FROM cinemas WHERE id = :id`,
       [id]
     );
-    return result.rows[0];
+    if (result.rows.length === 0) return null;
+    const [cid, name, address] = result.rows[0];
+    return { id: cid, name, address };
   } finally {
-    await conn.close();
+    if (conn) await conn.close();
   }
 }
 
-export async function createCinema({ nome, endereco, foto_url }) {
-  const conn = await getConnection();
+/**
+ * Cria um novo cinema
+ */
+async function createCinema(pool, { name, address }) {
+  let conn;
   try {
+    conn = await getConnection(pool);
     await conn.execute(
-      `
-      INSERT INTO CINEMAS (NOME, ENDERECO, FOTO_URL)
-      VALUES (:nome, :endereco, :foto_url)`,
-      { nome, endereco, foto_url },
+      `INSERT INTO cinemas (id, name, address) VALUES (cinemas_seq.NEXTVAL, :name, :address)`,
+      [name, address],
       { autoCommit: true }
     );
   } finally {
-    await conn.close();
+    if (conn) await conn.close();
   }
 }
 
-export async function updateCinema(id, { nome, endereco, foto_url }) {
-  const conn = await getConnection();
+/**
+ * Atualiza um cinema existente
+ */
+async function updateCinema(pool, id, { name, address }) {
+  let conn;
   try {
+    conn = await getConnection(pool);
     await conn.execute(
-      `
-      UPDATE CINEMAS
-      SET NOME = :nome,
-          ENDERECO = :endereco,
-          FOTO_URL = :foto_url
-      WHERE ID = :id`,
-      { id, nome, endereco, foto_url },
+      `UPDATE cinemas SET name = :name, address = :address WHERE id = :id`,
+      [name, address, id],
       { autoCommit: true }
     );
   } finally {
-    await conn.close();
+    if (conn) await conn.close();
   }
 }
 
-export async function deleteCinema(id) {
-  const conn = await getConnection();
+/**
+ * Deleta um cinema pelo ID
+ */
+async function deleteCinema(pool, id) {
+  let conn;
   try {
-    await conn.execute(
-      `
-      DELETE FROM CINEMAS
-      WHERE ID = :id`,
-      [id],
-      { autoCommit: true }
-    );
+    conn = await getConnection(pool);
+    await conn.execute(`DELETE FROM cinemas WHERE id = :id`, [id], { autoCommit: true });
   } finally {
-    await conn.close();
+    if (conn) await conn.close();
   }
 }
-*/
+
+module.exports = {
+  getAllCinemas,
+  getCinemaById,
+  createCinema,
+  updateCinema,
+  deleteCinema,
+};
