@@ -1,53 +1,19 @@
-const oracledb = require("oracledb");
-const crypto = require("crypto");
-const path = require("path");
+const mongoose = require("mongoose");
 
-const dbConfig = {
-  user: "popflix",
-  password: "vnc123",
-  connectString: "10.154.51.12:1521/XEPDB1",
-};
-
-async function criarPool() {
+async function connectDB() {
   try {
-    const pool = await oracledb.createPool({
-      ...dbConfig,
-      poolMin: 2,
-      poolMax: 10,
-      poolIncrement: 1,
-    });
-    console.log("✅ Pool de conexões criado com sucesso!");
-    return pool;
-  } catch (err) {
-    console.error("❌ Erro ao criar pool de conexões:", err);
-    return null;
+    await mongoose.connect(
+      "mongodb+srv://luser:fffpnr@cluster0.7wjux.mongodb.net/Final-BAck?retryWrites=true&w=majority&appName=Cluster0",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      }
+    );
+    console.log("🔥 MongoDB conectado com sucesso!");
+  } catch (error) {
+    console.error("❌ Erro ao conectar ao MongoDB:", error);
+    process.exit(1);
   }
 }
 
-async function getConnection(pool) {
-  try {
-    if (!pool) throw new Error("Pool não foi inicializado!");
-    const conn = await pool.getConnection();
-    return conn;
-  } catch (err) {
-    console.error("❌ Erro ao obter conexão do pool:", err);
-    return null;
-  }
-}
-
-const sessionSecret = crypto.randomBytes(16).toString("hex");
-const uploadsDir = path.join(process.cwd(), "uploads");
-
-const serverConfig = {
-  port: 8088,
-  maxFileSize: 5 * 1024 * 1024,
-};
-
-module.exports = {
-  dbConfig,
-  criarPool,
-  getConnection,
-  sessionSecret,
-  uploadsDir,
-  serverConfig,
-};
+module.exports = connectDB;
