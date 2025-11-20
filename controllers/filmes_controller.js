@@ -1,107 +1,56 @@
+const FilmesModel = require("../models/filmes_model");
 
-// src/controllers/filmesController.js
-/*
-import * as FilmeModel from "../models/filmeModel.js";
-
-export async function listarFilmes(req, res) {
+// HOME - listar filmes
+exports.listarFilmes = async (req, res) => {
   try {
-    const filmes = await FilmeModel.getFilmes();
-
-    res.json(filmes);
+    const filmes = await FilmesModel.getAllMovies();
+    res.render("templates/home", { filmes });
   } catch (err) {
-    console.error("Erro ao listar filmes:", err);
-    res.status(500).json({ error: "Erro interno ao listar filmes." });
+    console.error("Erro ao buscar filmes:", err);
+    res.status(500).send("Erro ao buscar filmes.");
   }
-}
+};
 
-export async function detalhesFilme(req, res) {
+// PÁGINA DE DETALHES
+exports.detalhesFilme = async (req, res) => {
   try {
-    const { id } = req.params;
-    const filme = await FilmeModel.getFilmePorId(id);
-
-    if (!filme) {
-      return res.status(404).json({ error: "Filme não encontrado." });
-    }
-
-    res.json(filme);
+    const filme = await FilmesModel.getMovieById(req.params.id);
+    res.render("templates/detalhes", { filme });
   } catch (err) {
     console.error("Erro ao buscar filme:", err);
-    res.status(500).json({ error: "Erro interno ao buscar filme." });
+    res.status(500).send("Erro ao buscar filme.");
   }
-}
+};
 
-export async function criarFilme(req, res) {
+// CRIAR FILME
+exports.criarFilme = async (req, res) => {
   try {
-    const {
-      titulo,
-      descricao,
-      genero,
-      ano_lancamento,
-      diretor,
-      sinopse,
-      poster_url,
-    } = req.body;
-
-    if (!titulo || !genero || !ano_lancamento) {
-      return res.status(400).json({ error: "Título, gênero e ano são obrigatórios." });
-    }
-
-    await FilmeModel.criarFilme({
-      titulo,
-      descricao,
-      genero,
-      ano_lancamento,
-      diretor,
-      sinopse,
-      poster_url,
-    });
-
-    res.status(201).json({ message: "Filme criado com sucesso!" });
+    await FilmesModel.createMovie(req.body);
+    res.redirect("/filmes");
   } catch (err) {
     console.error("Erro ao criar filme:", err);
-    res.status(500).json({ error: "Erro interno ao criar filme." });
+    res.status(500).send("Erro ao criar filme.");
   }
-}
+};
 
-export async function editarFilme(req, res) {
+// ATUALIZAR FILME
+exports.atualizarFilme = async (req, res) => {
   try {
-    const { id } = req.params;
-    const {
-      titulo,
-      descricao,
-      genero,
-      ano_lancamento,
-      diretor,
-      sinopse,
-      poster_url,
-    } = req.body;
-
-    await FilmeModel.atualizarFilme(id, {
-      titulo,
-      descricao,
-      genero,
-      ano_lancamento,
-      diretor,
-      sinopse,
-      poster_url,
-    });
-
-    res.json({ message: "Filme atualizado com sucesso!" });
+    await FilmesModel.updateMovie(req.params.id, req.body);
+    res.redirect("/filmes");
   } catch (err) {
-    console.error("Erro ao editar filme:", err);
-    res.status(500).json({ error: "Erro interno ao editar filme." });
+    console.error("Erro ao atualizar filme:", err);
+    res.status(500).send("Erro ao atualizar filme.");
   }
-}
+};
 
-export async function excluirFilme(req, res) {
+// DELETAR FILME
+exports.deletarFilme = async (req, res) => {
   try {
-    const { id } = req.params;
-    await FilmeModel.deletarFilme(id);
-    res.json({ message: "Filme excluído com sucesso!" });
+    await FilmesModel.deleteMovie(req.params.id);
+    res.redirect("/filmes");
   } catch (err) {
-    console.error("Erro ao excluir filme:", err);
-    res.status(500).json({ error: "Erro interno ao excluir filme." });
+    console.error("Erro ao deletar filme:", err);
+    res.status(500).send("Erro ao deletar filme.");
   }
-}
-
-*/
+};

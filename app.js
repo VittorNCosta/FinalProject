@@ -1,32 +1,24 @@
 const express = require("express");
-const connectDB = require("./config"); 
-const usersRouter = require("./routes/users");
+const path = require("path");
+const connectDB = require("./config");
 
-// ================================
-// CRIA O SERVIDOR
-// ================================
+const filmesRouter = require("./routes/filmes");
+
 const app = express();
 
-// Configura EJS
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
-// Middlewares para leitura de JSON 
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Conecta ao MongoDB
 connectDB();
 
-// Rotas
-app.use(usersRouter);
+// Usar as rotas de filmes
+app.use("/", filmesRouter);
 
-// Rota inicial para teste
-app.get("/", (req, res) => {
-  res.render("templates/home");
-});
-
-// Inicia servidor
 const PORT = 8088;
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
