@@ -142,12 +142,20 @@
         </section>
 
         <section class="filmes">
-        <div class="filme-card">
-            <img src="/views/static/IMG/simplesmenteacontece.jpg" alt="Simplesmente Acontece">
-            <h4>Simplesmente Acontece</h4>
-            <p>Christian Ditter</p>
-        </div>
+            <% if (filmes && filmes.length > 0) { %>
+                <% filmes.forEach(filme => { %>
+                <a href="/filmes/<%= filme._id %>" class="filme-card">
+                    <img src="<%= filme.imagem %>" alt="<%= filme.titulo %>">
+                    <h4><%= filme.titulo %></h4>
+                    <p><%= filme.diretor %></p>
+                </a>
+                <% }) %>
+            <% } else { %>
+                <p>Nenhum filme encontrado.</p>
+            <% } %>
         </section>
+
+
     </main>
 
     <footer>

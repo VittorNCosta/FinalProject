@@ -1,101 +1,78 @@
-/*import { getConnection } from "../config/db.js";
+const mongoose = require("mongoose");
 
-export async function getFilmes() {
-  const conn = await getConnection();
+// Schema representa a estrutura do documento no MongoDB
+const FilmeSchema = new mongoose.Schema({
+  titulo: { type: String, required: true },
+  diretor: String,
+  genero: String,
+  ano: Number,
+  sinopse: String,
+  imagem: String,
+  favorito: { type: Boolean, default: false }
+});
+
+// Model baseado no schema
+const Filme = mongoose.model("Filme", FilmeSchema);
+
+// ---------------------
+// FUNÇÕES DO CRUD
+// ---------------------
+
+// Listar todos os filmes
+async function getAllMovies() {
   try {
-    const result = await conn.execute(`
-      SELECT ID, TITULO, DESCRICAO, GENERO, ANO_LANCAMENTO, DIRETOR, SINOPSE, POSTER_URL
-      FROM FILMES
-      ORDER BY TITULO
-    `);
-    return result.rows;
-  } finally {
-    await conn.close();
+    return await Filme.find();
+  } catch (err) {
+    console.error("Erro ao buscar filmes:", err);
+    throw err;
   }
 }
 
-export async function getFilmePorId(id) {
-  const conn = await getConnection();
+// Buscar filme por ID
+async function getMovieById(id) {
   try {
-    const result = await conn.execute(
-      `
-      SELECT ID, TITULO, DESCRICAO, GENERO, ANO_LANCAMENTO, DIRETOR, SINOPSE, POSTER_URL
-      FROM FILMES
-      WHERE ID = :id
-      `,
-      { id }
-    );
-    return result.rows[0];
-  } finally {
-    await conn.close();
+    return await Filme.findById(id);
+  } catch (err) {
+    console.error("Erro ao buscar filme:", err);
+    throw err;
   }
 }
 
-export async function criarFilme({
-  titulo,
-  descricao,
-  genero,
-  ano_lancamento,
-  diretor,
-  sinopse,
-  poster_url,
-}) {
-  const conn = await getConnection();
+// Criar novo filme
+async function createMovie(data) {
   try {
-    await conn.execute(
-      `
-      INSERT INTO FILMES (TITULO, DESCRICAO, GENERO, ANO_LANCAMENTO, DIRETOR, SINOPSE, POSTER_URL)
-      VALUES (:titulo, :descricao, :genero, :ano_lancamento, :diretor, :sinopse, :poster_url)
-      `,
-      { titulo, descricao, genero, ano_lancamento, diretor, sinopse, poster_url },
-      { autoCommit: true }
-    );
-  } finally {
-    await conn.close();
+    return await Filme.create(data);
+  } catch (err) {
+    console.error("Erro ao criar filme:", err);
+    throw err;
   }
 }
 
-export async function atualizarFilme(id, {
-  titulo,
-  descricao,
-  genero,
-  ano_lancamento,
-  diretor,
-  sinopse,
-  poster_url,
-}) {
-  const conn = await getConnection();
+// Editar um filme existente
+async function updateMovie(id, data) {
   try {
-    await conn.execute(
-      `
-      UPDATE FILMES
-      SET TITULO = :titulo,
-          DESCRICAO = :descricao,
-          GENERO = :genero,
-          ANO_LANCAMENTO = :ano_lancamento,
-          DIRETOR = :diretor,
-          SINOPSE = :sinopse,
-          POSTER_URL = :poster_url
-      WHERE ID = :id
-      `,
-      { id, titulo, descricao, genero, ano_lancamento, diretor, sinopse, poster_url },
-      { autoCommit: true }
-    );
-  } finally {
-    await conn.close();
+    return await Filme.findByIdAndUpdate(id, data, { new: true });
+  } catch (err) {
+    console.error("Erro ao atualizar filme:", err);
+    throw err;
   }
 }
 
-export async function deletarFilme(id) {
-  const conn = await getConnection();
+// Apagar um filme
+async function deleteMovie(id) {
   try {
-    await conn.execute(
-      `DELETE FROM FILMES WHERE ID = :id`,
-      { id },
-      { autoCommit: true }
-    );
-  } finally {
-    await conn.close();
+    return await Filme.findByIdAndDelete(id);
+  } catch (err) {
+    console.error("Erro ao deletar filme:", err);
+    throw err;
   }
 }
-*/
+
+module.exports = {
+  Filme,
+  getAllMovies,
+  getMovieById,
+  createMovie,
+  updateMovie,
+  deleteMovie,
+};

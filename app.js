@@ -1,7 +1,8 @@
 const express = require("express");
 const path = require("path");
 const connectDB = require("./config");
-const usersRouter = require("./routes/users");
+
+const filmesRouter = require("./routes/filmes");
 
 const app = express();
 
@@ -14,11 +15,8 @@ app.use(express.json());
 
 connectDB();
 
-app.use(usersRouter);
-
-app.get("/", (req, res) => {
-  res.render("templates/home");
-});
+// Usar as rotas de filmes
+app.use("/", filmesRouter);
 
 const PORT = 8088;
 app.listen(PORT, () => {
