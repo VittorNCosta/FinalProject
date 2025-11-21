@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const connectDB = require("./config");
 
-const filmesRouter = require("./routes/filmes");
+const filmesRouter = require("./controllers/users_controller");
 
 const app = express();
 
@@ -17,6 +17,18 @@ connectDB();
 
 // Usar as rotas de filmes
 app.use("/", filmesRouter);
+
+app.get("/", (req, res) => {
+  res.redirect("/config");
+});
+
+
+
+app.get("/config", (req, res) => {
+  res.render("templates/config_sistema");
+});
+
+
 
 const PORT = 8088;
 app.listen(PORT, () => {

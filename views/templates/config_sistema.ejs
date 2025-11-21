@@ -230,8 +230,8 @@
             <div id="usuarios" class="tab-content active">
                 <div class="section-header">
                     <h2>Gerenciar Usuários</h2>
-                    <button class="add-btn" onclick="abrirPopup('popupUsuario')">Adicionar Usuário</button>
-                </div>
+            <button class="add-btn" onclick="novoUsuario()">Adicionar Usuário</button>       
+                 </div>
                 <table>
                     <thead>
                         <tr>
@@ -292,12 +292,13 @@
         <div class="popup" id="popupUsuario">
             <div class="popup-content">
                 <h3>Adicionar Usuário</h3>
-                <input type="text" placeholder="Nome de Usuário">
-                <input type="email" placeholder="E-mail">
-                <input type="password" placeholder="Senha">
+                <input id="usuarioNome" type="text" placeholder="Nome de Usuário">
+                <input id="usuarioEmail" type="email" placeholder="E-mail">
+                <input id="usuarioSenha" type="password" placeholder="Senha">
+                <input id="usuarioId" type="hidden" placeholder="Editar">
                 <div class="popup-buttons">
                     <button class="cancel-btn" onclick="fecharPopup('popupUsuario')">Cancelar</button>
-                    <button class="save-btn">Salvar</button>
+                    <button class="save-btn" onclick="CriarUsuario()">Salvar</button>
                 </div>
             </div>
         </div>
@@ -411,5 +412,172 @@
             });
         };
     </script>
+    <script>
+async function CriarUsuario() {
+    const nome = document.getElementById("usuarioNome").value;
+    const email = document.getElementById("usuarioEmail").value;
+    const senha = document.getElementById("usuarioSenha").value;
+
+    const data = { nome, email, senha };
+
+        if (!nome || !email || !senha) {
+        alert("Preencha todos os campos antes de salvar.");
+        return;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+        alert("E-mail inválido.");
+        return;
+        }
+
+    // Senha mínima
+    if (senha.length < 6) {
+        alert("A senha deve ter no mínimo 6 caracteres.");
+        return;
+    }
+    
+    try {
+        const response = await fetch("/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+    });
+
+
+        const result = await response.json();
+        console.log(result);
+
+        alert("Usuário cadastrado com sucesso!");
+        fecharPopup('popupUsuario');
+        carregarUsuarios();
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao cadastrar usuário");
+    }
+}
+</script>
+<script>
+async function carregarUsuarios() {
+    const tbody = document.querySelector("#usuarios tbody");
+
+    tbody.innerHTML = "<tr><td colspan='4'>Carregando...</td></tr>";
+
+    try {
+        const response = await fetch("/users");
+        const users = await response.json();
+
+        tbody.innerHTML = "";
+
+        users.forEach(user => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${user.nome}</td>
+                <td>${user.email}</td>
+                <td>${"*".repeat(user.senha.length)}</td>
+                <td>
+                    <button onclick="editar('${user._id}')">Editar</button>
+                    <button onclick="deletar('${user._id}')">Excluir</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+    } catch (err) {
+        console.error(err);
+        tbody.innerHTML = "<tr><td colspan='4'>Erro ao carregar usuários</td></tr>";
+    }
+}
+
+// carregar assim que a página abrir
+document.addEventListener("DOMContentLoaded", carregarUsuarios);
+</script>
+<script>
+function editar(id) {
+    fetch(`/users/${id}`)
+        .then(res => res.json())
+        .then(user => {
+            console.log("Retorno do backend:", user);  // <-- ESSENCIAL
+            document.getElementById("usuarioId").value = user._id;
+            document.getElementById("usuarioNome").value = user.nome;
+            document.getElementById("usuarioEmail").value = user.email;
+            document.getElementById("usuarioSenha").value = "*".repeat(user.senha.length);
+
+            document.querySelector("#popupUsuario h3").innerText = "Editar Usuário";
+            document.querySelector("#popupUsuario .save-btn").setAttribute("onclick", "salvarEdicao()");
+
+            abrirPopup("popupUsuario");
+        });
+}
+</script>
+<script>
+async function salvarEdicao() {
+    const id = document.getElementById("usuarioId").value;
+
+    const nome = document.getElementById("usuarioNome").value.trim();
+    const email = document.getElementById("usuarioEmail").value.trim();
+    const senha = document.getElementById("usuarioSenha").value.trim();
+
+    // --------- VALIDAÇÃO NO FRONT ---------
+    if (!nome || !email || !senha) {
+        alert("Todos os campos são obrigatórios!");
+        return; // <-- NÃO ENVIA PRO BACK-END
+    }
+
+    try {
+        const response = await fetch(`/users/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nome, email, senha })
+        });
+
+        const result = await response.json();
+
+        // --------- TRATAR ERRO DO BACK-END ---------
+        if (!response.ok) {
+            alert(result.error || "Erro ao atualizar.");
+            return;
+        }
+
+        // --------- SUCESSO ---------
+        alert("Usuário atualizado!");
+        fecharPopup("popupUsuario");
+        carregarUsuarios();
+
+    } catch (error) {
+        alert("Erro ao atualizar usuário.");
+        console.error(error);
+    }
+}
+
+</script>
+<script> function novoUsuario() {
+    document.getElementById("usuarioId").value = "";
+    document.getElementById("usuarioNome").value = "";
+    document.getElementById("usuarioEmail").value = "";
+    document.getElementById("usuarioSenha").value = "";
+
+    document.querySelector("#popupUsuario h3").innerText = "Adicionar Usuário";
+    document.querySelector("#popupUsuario .save-btn")
+        .setAttribute("onclick", "CriarUsuario()");
+
+    abrirPopup("popupUsuario");
+}
+</script>
+<script> 
+    async function deletar(id) {
+    if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
+
+    const response = await fetch(`http://localhost:8088/users/${id}`, {
+        method: "DELETE"
+    });
+
+    if (response.ok) {
+        alert("Usuário excluído com sucesso!");
+        carregarUsuarios(); // Atualiza a tabela
+    } else {
+        alert("Erro ao excluir usuário.");
+    }
+}
+</script>
 </body>
 </html>
