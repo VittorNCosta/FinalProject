@@ -30,7 +30,6 @@ function validarCampos(obrigatorios, body) {
 }
 
 
-// ----------------------------------------------------------------------
 // API LISTAR
 router.get("/users", async (req, res) => {
   try {
@@ -42,7 +41,6 @@ router.get("/users", async (req, res) => {
 });
 
 
-// ----------------------------------------------------------------------
 // API CRIAR
 router.post("/users", async (req, res) => {
   try {
@@ -63,8 +61,8 @@ router.post("/users", async (req, res) => {
 });
 
 
-// ----------------------------------------------------------------------
-// API BUSCAR POR ID
+
+// API BUSCAR PELO ID
 router.get("/users/:id", async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.id });
@@ -80,7 +78,6 @@ router.get("/users/:id", async (req, res) => {
 });
 
 
-// ----------------------------------------------------------------------
 // API ATUALIZAR
 router.put("/users/:id", async (req, res) => {
   try {
@@ -106,7 +103,6 @@ router.put("/users/:id", async (req, res) => {
 });
 
 
-// ----------------------------------------------------------------------
 // API DELETAR
 router.delete("/users/:id", async (req, res) => {
   try {

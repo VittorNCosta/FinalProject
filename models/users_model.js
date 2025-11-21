@@ -8,10 +8,11 @@ const UserSchema = new mongoose.Schema({
   senha: String,
 });
 
-// ===== MODEL =====
 const User = mongoose.model("User", UserSchema);
 
-// ===== CRUD FUNCTIONS =====
+
+
+// CRUD PADRÃO
 
 async function getAllUsers() {
   return await User.find();
