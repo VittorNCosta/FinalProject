@@ -91,22 +91,22 @@
                 <img src="/IMG/logo.png" alt="Logo Simoldes" class="logo-sidebar">
             </header>
                 
-            <a href="index.html" class="link-sidebar">
+            <a href="/views/templates/home.ejs" class="link-sidebar">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
             
-            <a href="#" class="link-sidebar" onclick="showTable('production')">
+            <a href="/favoritos" class="link-sidebar" onclick="showTable('production')">
                 <i class="fas fa-industry"></i>
                 <span >Favoritos</span>
             </a>
             
-            <a href="#" class="link-sidebar" onclick="showTable('finished')">
+            <a href="/cinemas" class="link-sidebar" onclick="showTable('finished')">
                 <i class="fas fa-check-circle"></i>
                 <span >Cinemas</span> 
             </a>
             
-            <a href="#" class="link-sidebar" onclick="showSettings()">
+            <a href="/config" class="link-sidebar" onclick="showSettings()">
                 <i class="fas fa-cog"></i>
                 <span>Configurações</span>
             </a>
@@ -145,7 +145,7 @@
             <% if (filmes && filmes.length > 0) { %>
                 <% filmes.forEach(filme => { %>
                 <a href="/filmes/<%= filme._id %>" class="filme-card">
-                    <img src="<%= filme.imagem %>" alt="<%= filme.titulo %>">
+                    <img src="<%= filme.poster %>" alt="<%= filme.titulo %>">
                     <h4><%= filme.titulo %></h4>
                     <p><%= filme.diretor %></p>
                 </a>

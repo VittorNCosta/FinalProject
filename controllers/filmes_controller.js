@@ -15,7 +15,12 @@ exports.listarFilmes = async (req, res) => {
 exports.detalhesFilme = async (req, res) => {
   try {
     const filme = await FilmesModel.getMovieById(req.params.id);
-    res.render("templates/detalhes", { filme });
+
+    if (!filme) {
+      return res.status(404).send("Filme não encontrado");
+    }
+
+    res.render("templates/detalhes_filme", { filme });
   } catch (err) {
     console.error("Erro ao buscar filme:", err);
     res.status(500).send("Erro ao buscar filme.");

@@ -3,16 +3,17 @@ const mongoose = require("mongoose");
 // Schema representa a estrutura do documento no MongoDB
 const FilmeSchema = new mongoose.Schema({
   titulo: { type: String, required: true },
+  descricao: String,
   diretor: String,
   genero: String,
   ano: Number,
   sinopse: String,
-  imagem: String,
+  poster: String,
   favorito: { type: Boolean, default: false }
 });
 
-// Model baseado no schema
-const Filme = mongoose.model("Filme", FilmeSchema);
+// 👉 força o Mongoose a usar a coleção "Filmes"
+const Filme = mongoose.model("filme", FilmeSchema, "filmes");
 
 // ---------------------
 // FUNÇÕES DO CRUD
