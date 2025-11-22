@@ -1,81 +1,36 @@
+const mongoose = require("mongoose");
 
-/*
-import { getConnection } from "../config.js";
+// Schema de cinemas
+const CinemaSchema = new mongoose.Schema({
+  nome: String,
+  endereco: String
+});
 
-export async function getCinemas() {
-  const conn = await getConnection();
-  try {
-    const result = await conn.execute(`
-      SELECT ID, NOME, ENDERECO, FOTO_URL
-      FROM CINEMAS
-      ORDER BY NOME`);
-    return result.rows;
-  } finally {
-    await conn.close();
-  }
+
+// Model
+const Cinema = mongoose.model("Cinema", CinemaSchema);
+
+// CRUD PADRÃO
+async function getAllCinemas() {
+  return await Cinema.find();
 }
 
-export async function getCinemaById(id) {
-  const conn = await getConnection();
-  try {
-    const result = await conn.execute(
-      `
-      SELECT ID, NOME, ENDERECO, FOTO_URL
-      FROM CINEMAS
-      WHERE ID = :id`,
-      [id]
-    );
-    return result.rows[0];
-  } finally {
-    await conn.close();
-  }
+async function createCinema(data) {
+  return await Cinema.create(data);
 }
 
-export async function createCinema({ nome, endereco, foto_url }) {
-  const conn = await getConnection();
-  try {
-    await conn.execute(
-      `
-      INSERT INTO CINEMAS (NOME, ENDERECO, FOTO_URL)
-      VALUES (:nome, :endereco, :foto_url)`,
-      { nome, endereco, foto_url },
-      { autoCommit: true }
-    );
-  } finally {
-    await conn.close();
-  }
+async function updateCinema(id, data) {
+  return await Cinema.findByIdAndUpdate(id, data, { new: true });
 }
 
-export async function updateCinema(id, { nome, endereco, foto_url }) {
-  const conn = await getConnection();
-  try {
-    await conn.execute(
-      `
-      UPDATE CINEMAS
-      SET NOME = :nome,
-          ENDERECO = :endereco,
-          FOTO_URL = :foto_url
-      WHERE ID = :id`,
-      { id, nome, endereco, foto_url },
-      { autoCommit: true }
-    );
-  } finally {
-    await conn.close();
-  }
+async function deleteCinema(id) {
+  return await Cinema.findByIdAndDelete(id);
 }
 
-export async function deleteCinema(id) {
-  const conn = await getConnection();
-  try {
-    await conn.execute(
-      `
-      DELETE FROM CINEMAS
-      WHERE ID = :id`,
-      [id],
-      { autoCommit: true }
-    );
-  } finally {
-    await conn.close();
-  }
-}
-*/
+module.exports = {
+  getAllCinemas,
+  createCinema,
+  updateCinema,
+  deleteCinema,
+  Cinema
+};
