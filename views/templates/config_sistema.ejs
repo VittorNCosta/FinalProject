@@ -222,7 +222,7 @@
 
             <div class="tabs">
                 <button class="tab-btn active" data-tab="usuarios">Usuários</button>
-                <button class="tab-btn" data-tab="cinemas">Cinemas</button>
+                <button class="tab-btn active" data-tab="cinemas">Cinemas</button>
                 <button class="tab-btn" data-tab="filmes">Filmes</button>
             </div>
 
@@ -246,17 +246,16 @@
             </div>
 
             <!-- Cinemas -->
-            <div id="cinemas" class="tab-content">
+            <div id="cinemas" class="tab-content active">
                 <div class="section-header">
                     <h2>Gerenciar Cinemas</h2>
-                    <button class="add-btn" onclick="abrirPopup('popupCinema')">Adicionar Cinema</button>
+                    <button class="add-btn" onclick="novoCinema()">Adicionar Cinema</button>
                 </div>
                 <table>
                     <thead>
                         <tr>
                             <th>Nome</th>
                             <th>Endereço</th>
-                            <th>Foto</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -306,15 +305,16 @@
         <div class="popup" id="popupCinema">
             <div class="popup-content">
                 <h3>Adicionar Cinema</h3>
-                <input type="text" placeholder="Nome do Cinema">
-                <input type="text" placeholder="Localização">
-                <input type="file" accept="image/*">
+                <input id="cinemaId" type="hidden"> <!-- ESSE INPUT É OBRIGATÓRIO -->
+                <input id="cinemaNome" type="text" placeholder="Nome do Cinema">
+                <input id="cinemaEndereco" type="text" placeholder="Localização">
                 <div class="popup-buttons">
                     <button class="cancel-btn" onclick="fecharPopup('popupCinema')">Cancelar</button>
-                    <button class="save-btn">Salvar</button>
+                    <button class="save-btn" onclick="salvarCinema()">Salvar</button>
                 </div>
             </div>
         </div>
+
 
         <div class="popup" id="popupFilme">
             <div class="popup-content">
@@ -563,6 +563,7 @@ async function salvarEdicao() {
     abrirPopup("popupUsuario");
 }
 </script>
+
 <script> 
     async function deletar(id) {
     if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
@@ -576,6 +577,171 @@ async function salvarEdicao() {
         carregarUsuarios(); // Atualiza a tabela
     } else {
         alert("Erro ao excluir usuário.");
+    }
+}
+</script>
+
+<script>
+async function salvarCinema() {
+    const nome = document.getElementById("cinemaNome").value;
+    const endereco = document.getElementById("cinemaEndereco").value;
+
+    const data = { nome, endereco};
+
+    if (!nome || !endereco) {
+        alert("Todos os campos são obrigatórios!");
+        return;
+    }
+
+    try {
+        const response = await fetch("/cinemas", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.error || "Erro ao cadastrar cinema");
+            return;
+        }
+
+        alert("Cinema cadastrado!");
+        fecharPopup("popupCinema");
+        carregarCinemas();
+
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao cadastrar cinema");
+    }
+}
+</script>
+<script>
+async function carregarCinemas() {
+    const tbody = document.querySelector("#cinemas tbody");
+
+    tbody.innerHTML = "<tr><td colspan='4'>Carregando...</td></tr>";
+
+    try {
+        const response = await fetch("/cinemas");
+        const cinemas = await response.json();
+
+        tbody.innerHTML = "";
+
+        cinemas.forEach(cinema => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>${cinema.nome}</td>
+                <td>${cinema.endereco}</td>
+                <td>
+                    <button onclick="editarCinema('${cinema._id}')">Editar</button>
+                    <button onclick="deletarCinema('${cinema._id}')">Excluir</button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+
+    } catch (err) {
+        console.error(err);
+        tbody.innerHTML = "<tr><td colspan='4'>Erro ao carregar cinemas</td></tr>";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", carregarCinemas);
+</script>
+<script>
+      function novoCinema() {
+    let cinemaIdElem = document.getElementById("cinemaId");
+    let cinemaNomeElem = document.getElementById("cinemaNome");
+    let cinemaEnderecoElem = document.getElementById("cinemaEndereco");
+
+    console.log({ cinemaIdElem, cinemaNomeElem, cinemaEnderecoElem });
+
+    if (cinemaIdElem) cinemaIdElem.value = "";
+    if (cinemaNomeElem) cinemaNomeElem.value = "";
+    if (cinemaEnderecoElem) cinemaEnderecoElem.value = "";
+
+    let popupH3 = document.querySelector("#popupCinema h3");
+    if (popupH3) popupH3.innerText = "Adicionar Cinema";
+
+    let saveBtn = document.querySelector("#popupCinema .save-btn");
+    if (saveBtn) saveBtn.setAttribute("onclick", "salvarCinema()");
+
+    abrirPopup("popupCinema");
+};
+   
+   
+</script>
+<script>
+function editarCinema(id) {
+    fetch(`/cinemas/${id}`)
+        .then(res => res.json())
+        .then(cinema => {
+            console.log("Retorno do backend:", cinema);
+            document.getElementById("cinemaId").value = cinema._id;
+            document.getElementById("cinemaNome").value = cinema.nome;
+            document.getElementById("cinemaEndereco").value = cinema.endereco;
+
+            document.querySelector("#popupCinema h3").innerText = "Editar Cinema";
+            document.querySelector("#popupCinema .save-btn")
+                .setAttribute("onclick", "salvarEdicaoCinema()");
+
+            abrirPopup("popupCinema");
+        });
+}
+</script>
+<script>
+async function salvarEdicaoCinema() {
+    const id = document.getElementById("cinemaId").value;
+
+    const nome = document.getElementById("cinemaNome").value.trim();
+    const endereco = document.getElementById("cinemaEndereco").value.trim();
+
+    if (!nome || !endereco) {
+        alert("Todos os campos são obrigatórios!");
+        return;
+    }
+
+    try {
+        const response = await fetch(`/cinemas/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nome, endereco})
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.error || "Erro ao atualizar cinema.");
+            return;
+        }
+
+        alert("Cinema atualizado!");
+        fecharPopup("popupCinema");
+        carregarCinemas();
+
+    } catch (error) {
+        alert("Erro ao atualizar cinema.");
+        console.error(error);
+    }
+}
+</script>
+<script>
+async function deletarCinema(id) {
+    if (!confirm("Tem certeza que deseja excluir este cinema?")) return;
+
+    const response = await fetch(`/cinemas/${id}`, {
+        method: "DELETE"
+    });
+
+    if (response.ok) {
+        alert("Cinema excluído com sucesso!");
+        carregarCinemas();
+    } else {
+        alert("Erro ao excluir cinema.");
     }
 }
 </script>
