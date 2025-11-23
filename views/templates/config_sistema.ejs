@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="IMG/icon.png" class="icon" alt="icon">
+    <link rel="icon" href="/IMG/icon.png" class="icon" alt="icon">
     <title>Configurações</title>
-    <link rel="stylesheet" href="css/style2.css">
+
+    <!-- CSS principal -->
+    <link rel="stylesheet" href="/css/style2.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         body {
             font-family: 'Open Sans', sans-serif;
@@ -161,8 +164,8 @@
 </head>
 <body>
     <header>
-        <a href="Index.html">
-            <img src="IMG/logo.png" alt="Logo" class="logo" id="logo">
+        <a href="/home">
+            <img src="/IMG/logo.png" alt="Logo" class="logo" id="logo">
         </a>
         <nav>
             <!-- Menu Lateral -->
@@ -179,25 +182,25 @@
 
             <div class="sidebar">
                 <header>
-                    <img src="IMG/logo.png" alt="Logo Simoldes" class="logo-sidebar">
+                    <img src="/IMG/logo.png" alt="Logo PopFlix" class="logo-sidebar">
                 </header>
                     
-                <a href="index.html" class="link-sidebar">
+                <a href="/home" class="link-sidebar">
                     <i class="fas fa-home"></i>
                     <span>Home</span>
                 </a>
                 
-                <a href="#" class="link-sidebar" onclick="showTable('production')">
-                    <i class="fas fa-industry"></i>
+                <a href="/favoritos" class="link-sidebar">
+                    <i class="fas fa-heart"></i>
                     <span>Favoritos</span>
                 </a>
                 
-                <a href="#" class="link-sidebar" onclick="showTable('finished')">
-                    <i class="fas fa-check-circle"></i>
+                <a href="/lista-cinemas" class="link-sidebar">
+                    <i class="fas fa-film"></i>
                     <span>Cinemas</span> 
                 </a>
                 
-                <a href="#" class="link-sidebar" onclick="showSettings()">
+                <a href="/config" class="link-sidebar active">
                     <i class="fas fa-cog"></i>
                     <span>Configurações</span>
                 </a>
@@ -205,9 +208,9 @@
                 <div class="user-section">
                     <div class="user-info">
                         <i class="fas fa-user-circle"></i>
-                        <span id="username">Nome do Usuário</span>
+                        <span id="username"><%= (currentUser && currentUser.username) || "Nome do Usuário" %></span>
                     </div>
-                    <a href="#" class="logout-btn" onclick="logout()">
+                    <a href="/auth/logout" class="logout-btn">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Sair</span>
                     </a>
@@ -230,8 +233,8 @@
             <div id="usuarios" class="tab-content active">
                 <div class="section-header">
                     <h2>Gerenciar Usuários</h2>
-            <button class="add-btn" onclick="novoUsuario()">Adicionar Usuário</button>       
-                 </div>
+                    <button class="add-btn" id="btnAddUsuario">Adicionar Usuário</button>
+                </div>
                 <table>
                     <thead>
                         <tr>
@@ -241,7 +244,7 @@
                             <th>Ações</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody id="usuarios-tbody"></tbody>
                 </table>
             </div>
 
@@ -249,7 +252,7 @@
             <div id="cinemas" class="tab-content active">
                 <div class="section-header">
                     <h2>Gerenciar Cinemas</h2>
-                    <button class="add-btn" onclick="novoCinema()">Adicionar Cinema</button>
+                    <button class="add-btn" id="btnAddCinema">Adicionar Cinema</button>
                 </div>
                 <table>
                     <thead>
@@ -259,7 +262,7 @@
                             <th>Ações</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody id="cinemas-tbody"></tbody>
                 </table>
             </div>
 
@@ -267,7 +270,7 @@
             <div id="filmes" class="tab-content">
                 <div class="section-header">
                     <h2>Gerenciar Filmes</h2>
-                    <button class="add-btn" onclick="abrirPopup('popupFilme')">Adicionar Filme</button>
+                    <button class="add-btn" id="btnAddFilme">Adicionar Filme</button>
                 </div>
                 <table>
                     <thead>
@@ -282,53 +285,56 @@
                             <th>Ações</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody id="filmes-tbody"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Popups -->
+        <!-- Popup Usuário -->
         <div class="popup" id="popupUsuario">
             <div class="popup-content">
-                <h3>Adicionar Usuário</h3>
+                <h3 id="tituloPopupUsuario">Adicionar Usuário</h3>
+                <input id="usuarioId" type="hidden">
                 <input id="usuarioNome" type="text" placeholder="Nome de Usuário">
                 <input id="usuarioEmail" type="email" placeholder="E-mail">
                 <input id="usuarioSenha" type="password" placeholder="Senha">
-                <input id="usuarioId" type="hidden" placeholder="Editar">
                 <div class="popup-buttons">
-                    <button class="cancel-btn" onclick="fecharPopup('popupUsuario')">Cancelar</button>
-                    <button class="save-btn" onclick="CriarUsuario()">Salvar</button>
+                    <button class="cancel-btn" data-popup-cancel="popupUsuario">Cancelar</button>
+                    <button class="save-btn" id="btnSalvarUsuario">Salvar</button>
                 </div>
             </div>
         </div>
 
+        <!-- Popup Cinema -->
         <div class="popup" id="popupCinema">
             <div class="popup-content">
-                <h3>Adicionar Cinema</h3>
-                <input id="cinemaId" type="hidden"> <!-- ESSE INPUT É OBRIGATÓRIO -->
+                <h3 id="tituloPopupCinema">Adicionar Cinema</h3>
+                <input id="cinemaId" type="hidden">
                 <input id="cinemaNome" type="text" placeholder="Nome do Cinema">
-                <input id="cinemaEndereco" type="text" placeholder="Localização">
+                <input id="cinemaEndereco" type="text" placeholder="Endereço">
+                <input id="cinemaFoto" type="text" placeholder="URL da imagem do cinema">
                 <div class="popup-buttons">
-                    <button class="cancel-btn" onclick="fecharPopup('popupCinema')">Cancelar</button>
-                    <button class="save-btn" onclick="salvarCinema()">Salvar</button>
+                    <button class="cancel-btn" data-popup-cancel="popupCinema">Cancelar</button>
+                    <button class="save-btn" id="btnSalvarCinema">Salvar</button>
                 </div>
             </div>
         </div>
 
-
+        <!-- Popup Filme -->
         <div class="popup" id="popupFilme">
             <div class="popup-content">
-                <h3>Adicionar Filme</h3>
-                <input type="text" placeholder="Título">
-                <input type="text" placeholder="Descrição">
-                <input type="text" placeholder="Gênero">
-                <input type="text" placeholder="Ano">
-                <input type="text" placeholder="Diretor">
-                <textarea rows="3" placeholder="Sinopse"></textarea>
-                <input type="file" accept="image/*">
+                <h3 id="tituloPopupFilme">Adicionar Filme</h3>
+                <input id="filmeId" type="hidden">
+                <input id="filmeTitulo" type="text" placeholder="Título">
+                <input id="filmeDescricao" type="text" placeholder="Descrição">
+                <input id="filmeGenero" type="text" placeholder="Gênero">
+                <input id="filmeAno" type="text" placeholder="Ano">
+                <input id="filmeDiretor" type="text" placeholder="Diretor">
+                <textarea id="filmeSinopse" rows="3" placeholder="Sinopse"></textarea>
+                <input id="filmePoster" type="text" placeholder="Poster (URL da imagem)">
                 <div class="popup-buttons">
-                    <button class="cancel-btn" onclick="fecharPopup('popupFilme')">Cancelar</button>
-                    <button class="save-btn">Salvar</button>
+                    <button class="cancel-btn" data-popup-cancel="popupFilme">Cancelar</button>
+                    <button class="save-btn" id="btnSalvarFilme">Salvar</button>
                 </div>
             </div>
         </div>
@@ -338,17 +344,14 @@
         <p>&copy; PopFlix.</p>
     </footer>
 
+    <!-- ======================== JS ======================== -->
     <script>
-        // ---------- Menu lateral ----------
-        const check = document.getElementById('check');
+    document.addEventListener("DOMContentLoaded", () => {
+        /* ================= MENU LATERAL ================= */
+        const check   = document.getElementById('check');
         const overlay = document.getElementById('overlay');
         const sidebar = document.querySelector('.sidebar');
-        const btn = document.getElementById('btn');
-
-        overlay.addEventListener('click', function() {
-            check.checked = false;
-            updateSidebarState();
-        });
+        const btnMenu = document.getElementById('btn');
 
         function updateSidebarState() {
             if (check.checked) {
@@ -366,14 +369,25 @@
             }
         }
 
-        check.addEventListener('change', updateSidebarState);
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                check.checked = false;
+                updateSidebarState();
+            });
+        }
 
-        document.addEventListener('click', function(e) {
-            if (check.checked && 
-                !sidebar.contains(e.target) && 
-                e.target !== check && 
-                e.target !== btn && 
-                !btn.contains(e.target)) {
+        if (check) {
+            check.addEventListener('change', updateSidebarState);
+        }
+
+        document.addEventListener('click', (e) => {
+            if (
+                check.checked &&
+                !sidebar.contains(e.target) &&
+                e.target !== check &&
+                e.target !== btnMenu &&
+                !btnMenu.contains(e.target)
+            ) {
                 setTimeout(() => {
                     check.checked = false;
                     updateSidebarState();
@@ -381,369 +395,624 @@
             }
         });
 
-    </script>
-    <script>
-        // ---------- Tabs ----------
-        const tabs = document.querySelectorAll('.tab-btn');
+        updateSidebarState();
+
+        /* ================= TABS ================= */
+        const tabs    = document.querySelectorAll('.tab-btn');
         const contents = document.querySelectorAll('.tab-content');
 
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 tabs.forEach(t => t.classList.remove('active'));
                 contents.forEach(c => c.classList.remove('active'));
+
                 tab.classList.add('active');
-                document.getElementById(tab.dataset.tab).classList.add('active');
+                const alvo = document.getElementById(tab.dataset.tab);
+                if (alvo) alvo.classList.add('active');
             });
         });
 
-        // ---------- Popups ----------
+        /* ================= POPUPS (GENÉRICO) ================= */
         function abrirPopup(id) {
-            document.getElementById(id).style.display = 'flex';
+            const popup = document.getElementById(id);
+            if (popup) popup.style.display = 'flex';
         }
 
         function fecharPopup(id) {
-            document.getElementById(id).style.display = 'none';
+            const popup = document.getElementById(id);
+            if (popup) popup.style.display = 'none';
         }
 
-        window.onclick = function(e) {
-            const popups = document.querySelectorAll('.popup');
-            popups.forEach(p => {
-                if (e.target === p) p.style.display = 'none';
+        // Fecha popup clicando no fundo
+        document.querySelectorAll('.popup').forEach(popup => {
+            popup.addEventListener('click', (e) => {
+                if (e.target === popup) {
+                    popup.style.display = 'none';
+                }
             });
-        };
+        });
+
+        // Botões de cancelar genéricos
+        document.querySelectorAll('[data-popup-cancel]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-popup-cancel');
+                fecharPopup(id);
+            });
+        });
+
+        /* ================== USUÁRIOS ================== */
+        let modoUsuario = "criar"; // 'criar' ou 'editar'
+
+        const tbodyUsuarios   = document.getElementById("usuarios-tbody");
+        const btnAddUsuario   = document.getElementById("btnAddUsuario");
+        const btnSalvarUsuario = document.getElementById("btnSalvarUsuario");
+        const tituloPopupUsuario = document.getElementById("tituloPopupUsuario");
+
+        function limparFormularioUsuario() {
+            document.getElementById("usuarioId").value    = "";
+            document.getElementById("usuarioNome").value  = "";
+            document.getElementById("usuarioEmail").value = "";
+            document.getElementById("usuarioSenha").value = "";
+        }
+
+        if (btnAddUsuario) {
+            btnAddUsuario.addEventListener("click", () => {
+                modoUsuario = "criar";
+                tituloPopupUsuario.textContent = "Adicionar Usuário";
+                limparFormularioUsuario();
+                abrirPopup("popupUsuario");
+            });
+        }
+
+        if (btnSalvarUsuario) {
+            btnSalvarUsuario.addEventListener("click", async () => {
+                if (modoUsuario === "criar") {
+                    await salvarUsuario();
+                } else {
+                    await salvarEdicaoUsuario();
+                }
+            });
+        }
+
+        async function salvarUsuario() {
+            const nome  = document.getElementById("usuarioNome").value.trim();
+            const email = document.getElementById("usuarioEmail").value.trim();
+            const senha = document.getElementById("usuarioSenha").value.trim();
+
+            if (!nome || !email || !senha) {
+                alert("Preencha nome, e-mail e senha.");
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert("E-mail inválido.");
+                return;
+            }
+
+            if (senha.length < 6) {
+                alert("A senha deve ter pelo menos 6 caracteres.");
+                return;
+            }
+
+            const data = { nome, email, senha };
+
+            try {
+                const response = await fetch("/users", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    alert(result.error || "Erro ao salvar usuário.");
+                    return;
+                }
+
+                alert("Usuário cadastrado com sucesso!");
+                fecharPopup("popupUsuario");
+                carregarUsuarios();
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao salvar usuário.");
+            }
+        }
+
+        async function carregarUsuarios() {
+            if (!tbodyUsuarios) return;
+
+            tbodyUsuarios.innerHTML = "<tr><td colspan='4'>Carregando...</td></tr>";
+
+            try {
+                const response = await fetch("/users");
+                const users = await response.json();
+
+                tbodyUsuarios.innerHTML = "";
+
+                if (!users || users.length === 0) {
+                    tbodyUsuarios.innerHTML = "<tr><td colspan='4'>Nenhum usuário cadastrado.</td></tr>";
+                    return;
+                }
+
+                users.forEach(user => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${user.nome}</td>
+                        <td>${user.email}</td>
+                        <td>••••••••</td>
+                        <td>
+                            <button class="btn-editar-usuario" data-id="${user._id}">Editar</button>
+                            <button class="btn-deletar-usuario" data-id="${user._id}">Excluir</button>
+                        </td>
+                    `;
+                    tbodyUsuarios.appendChild(tr);
+                });
+
+            } catch (err) {
+                console.error(err);
+                tbodyUsuarios.innerHTML = "<tr><td colspan='4'>Erro ao carregar usuários.</td></tr>";
+            }
+        }
+
+        // Delegação de eventos para editar/deletar usuário
+        if (tbodyUsuarios) {
+            tbodyUsuarios.addEventListener("click", async (e) => {
+                const btn = e.target;
+                const id = btn.getAttribute("data-id");
+                if (!id) return;
+
+                if (btn.classList.contains("btn-editar-usuario")) {
+                    await editarUsuario(id);
+                } else if (btn.classList.contains("btn-deletar-usuario")) {
+                    await deletarUsuario(id);
+                }
+            });
+        }
+
+        async function editarUsuario(id) {
+            try {
+                const response = await fetch(`/users/${id}`);
+                const user = await response.json();
+
+                document.getElementById("usuarioId").value    = user._id;
+                document.getElementById("usuarioNome").value  = user.nome || "";
+                document.getElementById("usuarioEmail").value = user.email || "";
+                document.getElementById("usuarioSenha").value = "";
+
+                modoUsuario = "editar";
+                tituloPopupUsuario.textContent = "Editar Usuário";
+                abrirPopup("popupUsuario");
+            } catch (err) {
+                console.error(err);
+                alert("Erro ao carregar usuário para edição.");
+            }
+        }
+
+        async function salvarEdicaoUsuario() {
+            const id    = document.getElementById("usuarioId").value;
+            const nome  = document.getElementById("usuarioNome").value.trim();
+            const email = document.getElementById("usuarioEmail").value.trim();
+            const senha = document.getElementById("usuarioSenha").value.trim();
+
+            if (!nome || !email || !senha) {
+                alert("Todos os campos são obrigatórios!");
+                return;
+            }
+
+            try {
+                const response = await fetch(`/users/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nome, email, senha })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    alert(result.error || "Erro ao atualizar.");
+                    return;
+                }
+
+                alert("Usuário atualizado!");
+                fecharPopup("popupUsuario");
+                carregarUsuarios();
+
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao atualizar usuário.");
+            }
+        }
+
+        async function deletarUsuario(id) {
+            if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
+
+            try {
+                const response = await fetch(`/users/${id}`, { method: "DELETE" });
+
+                if (!response.ok) {
+                    const result = await response.json();
+                    alert(result.error || "Erro ao excluir usuário.");
+                    return;
+                }
+
+                alert("Usuário excluído com sucesso!");
+                carregarUsuarios();
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao excluir usuário.");
+            }
+        }
+
+        /* ================== FILMES ================== */
+        const tbodyFilmes      = document.getElementById("filmes-tbody");
+        const btnAddFilme      = document.getElementById("btnAddFilme");
+        const btnSalvarFilme   = document.getElementById("btnSalvarFilme");
+        const tituloPopupFilme = document.getElementById("tituloPopupFilme");
+        let modoFilme = "criar";
+
+        function limparFormularioFilme() {
+            document.getElementById("filmeId").value        = "";
+            document.getElementById("filmeTitulo").value    = "";
+            document.getElementById("filmeDescricao").value = "";
+            document.getElementById("filmeGenero").value    = "";
+            document.getElementById("filmeAno").value       = "";
+            document.getElementById("filmeDiretor").value   = "";
+            document.getElementById("filmeSinopse").value   = "";
+            document.getElementById("filmePoster").value    = "";
+        }
+
+        if (btnAddFilme) {
+            btnAddFilme.addEventListener("click", () => {
+                modoFilme = "criar";
+                tituloPopupFilme.textContent = "Adicionar Filme";
+                limparFormularioFilme();
+                abrirPopup("popupFilme");
+            });
+        }
+
+        if (btnSalvarFilme) {
+            btnSalvarFilme.addEventListener("click", async () => {
+                if (modoFilme === "criar") {
+                    await salvarFilme();
+                } else {
+                    await salvarEdicaoFilme();
+                }
+            });
+        }
+
+        async function salvarFilme() {
+            const id        = document.getElementById("filmeId").value;
+            const titulo    = document.getElementById("filmeTitulo").value.trim();
+            const descricao = document.getElementById("filmeDescricao").value.trim();
+            const genero    = document.getElementById("filmeGenero").value.trim();
+            const ano       = document.getElementById("filmeAno").value.trim();
+            const diretor   = document.getElementById("filmeDiretor").value.trim();
+            const sinopse   = document.getElementById("filmeSinopse").value.trim();
+            const poster    = document.getElementById("filmePoster").value.trim();
+
+            if (!titulo || !genero || !ano) {
+                alert("Preencha pelo menos Título, Gênero e Ano.");
+                return;
+            }
+
+            const filme = { titulo, descricao, genero, ano, diretor, sinopse, poster };
+
+            try {
+                const url = id ? `/filmes/${id}` : "/filmes";
+                const method = id ? "PUT" : "POST";
+
+                const response = await fetch(url, {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(filme)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    alert(result.error || "Erro ao salvar filme.");
+                    return;
+                }
+
+                alert(id ? "Filme atualizado com sucesso!" : "Filme cadastrado com sucesso!");
+                fecharPopup("popupFilme");
+                carregarFilmes();
+
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao salvar filme.");
+            }
+        }
+
+        async function carregarFilmes() {
+            if (!tbodyFilmes) return;
+
+            tbodyFilmes.innerHTML = "<tr><td colspan='8'>Carregando...</td></tr>";
+
+            try {
+                const response = await fetch("/filmes");
+                const filmes = await response.json();
+
+                tbodyFilmes.innerHTML = "";
+
+                if (!filmes || filmes.length === 0) {
+                    tbodyFilmes.innerHTML = "<tr><td colspan='8'>Nenhum filme cadastrado.</td></tr>";
+                    return;
+                }
+
+                filmes.forEach(filme => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${filme.titulo || ""}</td>
+                        <td>${filme.descricao || ""}</td>
+                        <td>${filme.genero || ""}</td>
+                        <td>${filme.ano || ""}</td>
+                        <td>${filme.diretor || ""}</td>
+                        <td>${filme.sinopse || ""}</td>
+                        <td>
+                            ${filme.poster 
+                                ? `<img src="${filme.poster}" style="width: 60px; height: auto; border-radius: 4px;" />`
+                                : "-"
+                            }
+                        </td>
+                        <td>
+                            <button class="btn-editar-filme" data-id="${filme._id}">Editar</button>
+                            <button class="btn-deletar-filme" data-id="${filme._id}">Excluir</button>
+                        </td>
+                    `;
+                    tbodyFilmes.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error(error);
+                tbodyFilmes.innerHTML = "<tr><td colspan='8'>Erro ao carregar filmes.</td></tr>";
+            }
+        }
+
+        if (tbodyFilmes) {
+            tbodyFilmes.addEventListener("click", async (e) => {
+                const btn = e.target;
+                const id = btn.getAttribute("data-id");
+                if (!id) return;
+
+                if (btn.classList.contains("btn-editar-filme")) {
+                    await editarFilme(id);
+                } else if (btn.classList.contains("btn-deletar-filme")) {
+                    await deletarFilme(id);
+                }
+            });
+        }
+
+        async function editarFilme(id) {
+            try {
+                const response = await fetch(`/filmes/${id}`);
+                const filme = await response.json();
+
+                document.getElementById("filmeId").value          = filme._id;
+                document.getElementById("filmeTitulo").value      = filme.titulo    || "";
+                document.getElementById("filmeDescricao").value   = filme.descricao || "";
+                document.getElementById("filmeGenero").value      = filme.genero    || "";
+                document.getElementById("filmeAno").value         = filme.ano       || "";
+                document.getElementById("filmeDiretor").value     = filme.diretor   || "";
+                document.getElementById("filmeSinopse").value     = filme.sinopse   || "";
+                document.getElementById("filmePoster").value      = filme.poster    || "";
+
+                modoFilme = "editar";
+                tituloPopupFilme.textContent = "Editar Filme";
+                abrirPopup("popupFilme");
+
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao carregar filme para edição.");
+            }
+        }
+
+        async function salvarEdicaoFilme() {
+            await salvarFilme(); // mesma lógica de salvar, usando id preenchido
+        }
+
+        async function deletarFilme(id) {
+            if (!confirm("Deseja realmente excluir este filme?")) return;
+
+            try {
+                const response = await fetch(`/filmes/${id}`, { method: "DELETE" });
+
+                if (!response.ok) {
+                    const result = await response.json();
+                    alert(result.error || "Erro ao excluir filme.");
+                    return;
+                }
+
+                alert("Filme excluído com sucesso!");
+                carregarFilmes();
+
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao excluir filme.");
+            }
+        }
+
+        /* ================== CINEMAS ================== */
+        const tbodyCinemas      = document.getElementById("cinemas-tbody");
+        const btnAddCinema      = document.getElementById("btnAddCinema");
+        const btnSalvarCinema   = document.getElementById("btnSalvarCinema");
+        const tituloPopupCinema = document.getElementById("tituloPopupCinema");
+        let modoCinema = "criar";
+
+        function limparFormularioCinema() {
+            document.getElementById("cinemaId").value       = "";
+            document.getElementById("cinemaNome").value     = "";
+            document.getElementById("cinemaEndereco").value = "";
+            document.getElementById("cinemaFoto").value     = "";
+        }
+
+        if (btnAddCinema) {
+            btnAddCinema.addEventListener("click", () => {
+                modoCinema = "criar";
+                tituloPopupCinema.textContent = "Adicionar Cinema";
+                limparFormularioCinema();
+                abrirPopup("popupCinema");
+            });
+        }
+
+        if (btnSalvarCinema) {
+            btnSalvarCinema.addEventListener("click", async () => {
+                if (modoCinema === "criar") {
+                    await salvarCinema();
+                } else {
+                    await salvarEdicaoCinema();
+                }
+            });
+        }
+
+        async function salvarCinema() {
+            const id       = document.getElementById("cinemaId").value;
+            const nome     = document.getElementById("cinemaNome").value.trim();
+            const endereco = document.getElementById("cinemaEndereco").value.trim();
+            const foto     = document.getElementById("cinemaFoto").value.trim();
+
+            if (!nome || !endereco) {
+                alert("Nome e endereço são obrigatórios!");
+                return;
+            }
+
+            const data = { nome, endereco, foto };
+
+            try {
+                const url = id ? `/cinemas/${id}` : "/cinemas";
+                const method = id ? "PUT" : "POST";
+
+                const response = await fetch(url, {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    alert(result.error || "Erro ao salvar cinema.");
+                    return;
+                }
+
+                alert(id ? "Cinema atualizado!" : "Cinema cadastrado!");
+                fecharPopup("popupCinema");
+                carregarCinemas();
+
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao salvar cinema.");
+            }
+        }
+
+        async function carregarCinemas() {
+            if (!tbodyCinemas) return;
+
+            tbodyCinemas.innerHTML = "<tr><td colspan='4'>Carregando...</td></tr>";
+
+            try {
+                const response = await fetch("/cinemas");
+                const cinemas = await response.json();
+
+                tbodyCinemas.innerHTML = "";
+
+                if (!cinemas || cinemas.length === 0) {
+                    tbodyCinemas.innerHTML = "<tr><td colspan='4'>Nenhum cinema cadastrado.</td></tr>";
+                    return;
+                }
+
+                cinemas.forEach(cinema => {
+                    const tr = document.createElement("tr");
+
+                    tr.innerHTML = `
+                        <td>${cinema.nome}</td>
+                        <td>${cinema.endereco}</td>
+                        <td>
+                            ${cinema.foto 
+                                ? `<img src="${cinema.foto}" style="width: 60px; height: auto; border-radius: 4px;" />`
+                                : "-"
+                            }
+                        </td>
+                        <td>
+                            <button class="btn-editar-cinema" data-id="${cinema._id}">Editar</button>
+                            <button class="btn-deletar-cinema" data-id="${cinema._id}">Excluir</button>
+                        </td>
+                    `;
+
+                    tbodyCinemas.appendChild(tr);
+                });
+
+            } catch (err) {
+                console.error(err);
+                tbodyCinemas.innerHTML = "<tr><td colspan='4'>Erro ao carregar cinemas.</td></tr>";
+            }
+        }
+
+        if (tbodyCinemas) {
+            tbodyCinemas.addEventListener("click", async (e) => {
+                const btn = e.target;
+                const id = btn.getAttribute("data-id");
+                if (!id) return;
+
+                if (btn.classList.contains("btn-editar-cinema")) {
+                    await editarCinema(id);
+                } else if (btn.classList.contains("btn-deletar-cinema")) {
+                    await deletarCinema(id);
+                }
+            });
+        }
+
+        async function editarCinema(id) {
+            try {
+                const response = await fetch(`/cinemas/${id}`);
+                const cinema = await response.json();
+
+                document.getElementById("cinemaId").value       = cinema._id;
+                document.getElementById("cinemaNome").value     = cinema.nome || "";
+                document.getElementById("cinemaEndereco").value = cinema.endereco || "";
+                document.getElementById("cinemaFoto").value     = cinema.foto || "";
+
+                modoCinema = "editar";
+                tituloPopupCinema.textContent = "Editar Cinema";
+                abrirPopup("popupCinema");
+            } catch (err) {
+                console.error(err);
+                alert("Erro ao carregar cinema para edição.");
+            }
+        }
+
+        async function salvarEdicaoCinema() {
+            await salvarCinema();
+        }
+
+        async function deletarCinema(id) {
+            if (!confirm("Tem certeza que deseja excluir este cinema?")) return;
+
+            try {
+                const response = await fetch(`/cinemas/${id}`, { method: "DELETE" });
+
+                if (!response.ok) {
+                    const result = await response.json();
+                    alert(result.error || "Erro ao excluir cinema.");
+                    return;
+                }
+
+                alert("Cinema excluído com sucesso!");
+                carregarCinemas();
+
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao excluir cinema.");
+            }
+        }
+
+        /* ================== CARREGAR DADOS AO ABRIR ================== */
+        carregarUsuarios();
+        carregarFilmes();
+        carregarCinemas();
+    });
     </script>
-    <script>
-async function CriarUsuario() {
-    const nome = document.getElementById("usuarioNome").value;
-    const email = document.getElementById("usuarioEmail").value;
-    const senha = document.getElementById("usuarioSenha").value;
-
-    const data = { nome, email, senha };
-
-        if (!nome || !email || !senha) {
-        alert("Preencha todos os campos antes de salvar.");
-        return;
-        }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-        alert("E-mail inválido.");
-        return;
-        }
-
-    // Senha mínima
-    if (senha.length < 6) {
-        alert("A senha deve ter no mínimo 6 caracteres.");
-        return;
-    }
-    
-    try {
-        const response = await fetch("/users", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-    });
-
-
-        const result = await response.json();
-        console.log(result);
-
-        alert("Usuário cadastrado com sucesso!");
-        fecharPopup('popupUsuario');
-        carregarUsuarios();
-    } catch (error) {
-        console.error(error);
-        alert("Erro ao cadastrar usuário");
-    }
-}
-</script>
-<script>
-async function carregarUsuarios() {
-    const tbody = document.querySelector("#usuarios tbody");
-
-    tbody.innerHTML = "<tr><td colspan='4'>Carregando...</td></tr>";
-
-    try {
-        const response = await fetch("/users");
-        const users = await response.json();
-
-        tbody.innerHTML = "";
-
-        users.forEach(user => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${user.nome}</td>
-                <td>${user.email}</td>
-                <td>${"*".repeat(user.senha.length)}</td>
-                <td>
-                    <button onclick="editar('${user._id}')">Editar</button>
-                    <button onclick="deletar('${user._id}')">Excluir</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-    } catch (err) {
-        console.error(err);
-        tbody.innerHTML = "<tr><td colspan='4'>Erro ao carregar usuários</td></tr>";
-    }
-}
-
-// carregar assim que a página abrir
-document.addEventListener("DOMContentLoaded", carregarUsuarios);
-</script>
-<script>
-function editar(id) {
-    fetch(`/users/${id}`)
-        .then(res => res.json())
-        .then(user => {
-            console.log("Retorno do backend:", user);  // <-- ESSENCIAL
-            document.getElementById("usuarioId").value = user._id;
-            document.getElementById("usuarioNome").value = user.nome;
-            document.getElementById("usuarioEmail").value = user.email;
-            document.getElementById("usuarioSenha").value = "*".repeat(user.senha.length);
-
-            document.querySelector("#popupUsuario h3").innerText = "Editar Usuário";
-            document.querySelector("#popupUsuario .save-btn").setAttribute("onclick", "salvarEdicao()");
-
-            abrirPopup("popupUsuario");
-        });
-}
-</script>
-<script>
-async function salvarEdicao() {
-    const id = document.getElementById("usuarioId").value;
-
-    const nome = document.getElementById("usuarioNome").value.trim();
-    const email = document.getElementById("usuarioEmail").value.trim();
-    const senha = document.getElementById("usuarioSenha").value.trim();
-
-    // --------- VALIDAÇÃO NO FRONT ---------
-    if (!nome || !email || !senha) {
-        alert("Todos os campos são obrigatórios!");
-        return; // <-- NÃO ENVIA PRO BACK-END
-    }
-
-    try {
-        const response = await fetch(`/users/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nome, email, senha })
-        });
-
-        const result = await response.json();
-
-        // --------- TRATAR ERRO DO BACK-END ---------
-        if (!response.ok) {
-            alert(result.error || "Erro ao atualizar.");
-            return;
-        }
-
-        // --------- SUCESSO ---------
-        alert("Usuário atualizado!");
-        fecharPopup("popupUsuario");
-        carregarUsuarios();
-
-    } catch (error) {
-        alert("Erro ao atualizar usuário.");
-        console.error(error);
-    }
-}
-
-</script>
-<script> function novoUsuario() {
-    document.getElementById("usuarioId").value = "";
-    document.getElementById("usuarioNome").value = "";
-    document.getElementById("usuarioEmail").value = "";
-    document.getElementById("usuarioSenha").value = "";
-
-    document.querySelector("#popupUsuario h3").innerText = "Adicionar Usuário";
-    document.querySelector("#popupUsuario .save-btn")
-        .setAttribute("onclick", "CriarUsuario()");
-
-    abrirPopup("popupUsuario");
-}
-</script>
-
-<script> 
-    async function deletar(id) {
-    if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
-
-    const response = await fetch(`http://localhost:8088/users/${id}`, {
-        method: "DELETE"
-    });
-
-    if (response.ok) {
-        alert("Usuário excluído com sucesso!");
-        carregarUsuarios(); // Atualiza a tabela
-    } else {
-        alert("Erro ao excluir usuário.");
-    }
-}
-</script>
-
-<script>
-async function salvarCinema() {
-    const nome = document.getElementById("cinemaNome").value;
-    const endereco = document.getElementById("cinemaEndereco").value;
-
-    const data = { nome, endereco};
-
-    if (!nome || !endereco) {
-        alert("Todos os campos são obrigatórios!");
-        return;
-    }
-
-    try {
-        const response = await fetch("/cinemas", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            alert(result.error || "Erro ao cadastrar cinema");
-            return;
-        }
-
-        alert("Cinema cadastrado!");
-        fecharPopup("popupCinema");
-        carregarCinemas();
-
-    } catch (error) {
-        console.error(error);
-        alert("Erro ao cadastrar cinema");
-    }
-}
-</script>
-<script>
-async function carregarCinemas() {
-    const tbody = document.querySelector("#cinemas tbody");
-
-    tbody.innerHTML = "<tr><td colspan='4'>Carregando...</td></tr>";
-
-    try {
-        const response = await fetch("/cinemas");
-        const cinemas = await response.json();
-
-        tbody.innerHTML = "";
-
-        cinemas.forEach(cinema => {
-            const tr = document.createElement("tr");
-
-            tr.innerHTML = `
-                <td>${cinema.nome}</td>
-                <td>${cinema.endereco}</td>
-                <td>
-                    <button onclick="editarCinema('${cinema._id}')">Editar</button>
-                    <button onclick="deletarCinema('${cinema._id}')">Excluir</button>
-                </td>
-            `;
-
-            tbody.appendChild(tr);
-        });
-
-    } catch (err) {
-        console.error(err);
-        tbody.innerHTML = "<tr><td colspan='4'>Erro ao carregar cinemas</td></tr>";
-    }
-}
-
-document.addEventListener("DOMContentLoaded", carregarCinemas);
-</script>
-<script>
-      function novoCinema() {
-    let cinemaIdElem = document.getElementById("cinemaId");
-    let cinemaNomeElem = document.getElementById("cinemaNome");
-    let cinemaEnderecoElem = document.getElementById("cinemaEndereco");
-
-    console.log({ cinemaIdElem, cinemaNomeElem, cinemaEnderecoElem });
-
-    if (cinemaIdElem) cinemaIdElem.value = "";
-    if (cinemaNomeElem) cinemaNomeElem.value = "";
-    if (cinemaEnderecoElem) cinemaEnderecoElem.value = "";
-
-    let popupH3 = document.querySelector("#popupCinema h3");
-    if (popupH3) popupH3.innerText = "Adicionar Cinema";
-
-    let saveBtn = document.querySelector("#popupCinema .save-btn");
-    if (saveBtn) saveBtn.setAttribute("onclick", "salvarCinema()");
-
-    abrirPopup("popupCinema");
-};
-   
-   
-</script>
-<script>
-function editarCinema(id) {
-    fetch(`/cinemas/${id}`)
-        .then(res => res.json())
-        .then(cinema => {
-            console.log("Retorno do backend:", cinema);
-            document.getElementById("cinemaId").value = cinema._id;
-            document.getElementById("cinemaNome").value = cinema.nome;
-            document.getElementById("cinemaEndereco").value = cinema.endereco;
-
-            document.querySelector("#popupCinema h3").innerText = "Editar Cinema";
-            document.querySelector("#popupCinema .save-btn")
-                .setAttribute("onclick", "salvarEdicaoCinema()");
-
-            abrirPopup("popupCinema");
-        });
-}
-</script>
-<script>
-async function salvarEdicaoCinema() {
-    const id = document.getElementById("cinemaId").value;
-
-    const nome = document.getElementById("cinemaNome").value.trim();
-    const endereco = document.getElementById("cinemaEndereco").value.trim();
-
-    if (!nome || !endereco) {
-        alert("Todos os campos são obrigatórios!");
-        return;
-    }
-
-    try {
-        const response = await fetch(`/cinemas/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nome, endereco})
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            alert(result.error || "Erro ao atualizar cinema.");
-            return;
-        }
-
-        alert("Cinema atualizado!");
-        fecharPopup("popupCinema");
-        carregarCinemas();
-
-    } catch (error) {
-        alert("Erro ao atualizar cinema.");
-        console.error(error);
-    }
-}
-</script>
-<script>
-async function deletarCinema(id) {
-    if (!confirm("Tem certeza que deseja excluir este cinema?")) return;
-
-    const response = await fetch(`/cinemas/${id}`, {
-        method: "DELETE"
-    });
-
-    if (response.ok) {
-        alert("Cinema excluído com sucesso!");
-        carregarCinemas();
-    } else {
-        alert("Erro ao excluir cinema.");
-    }
-}
-</script>
 </body>
 </html>

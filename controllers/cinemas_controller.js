@@ -56,7 +56,8 @@ router.post("/", async (req, res) => {
 
     const result = await createCinema({
       nome: req.body.nome,
-      endereco: req.body.endereco
+      endereco: req.body.endereco,
+      foto: req.body.foto
     });
     res.json(result);
 
@@ -100,7 +101,8 @@ router.put("/:id", async (req, res) => {
 
     const result = await updateCinema(req.params.id, {
       nome: req.body.nome,
-      endereco: req.body.endereco
+      endereco: req.body.endereco,
+      foto: req.body.foto
     });
 
     if (!result) {

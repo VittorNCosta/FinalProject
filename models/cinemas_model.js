@@ -2,10 +2,19 @@ const mongoose = require("mongoose");
 
 // Schema de cinemas
 const CinemaSchema = new mongoose.Schema({
-  nome: String,
-  endereco: String
+  nome: {
+    type: String,
+    required: true
+  },
+  endereco: {
+    type: String,
+    required: true
+  },
+  foto: {
+    type: String, 
+    required: false  // pode ser opcional
+  }
 });
-
 
 // Model
 const Cinema = mongoose.model("Cinema", CinemaSchema);
