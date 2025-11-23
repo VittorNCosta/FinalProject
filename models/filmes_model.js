@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-// Schema representa a estrutura do documento no MongoDB
+// Schema
 const FilmeSchema = new mongoose.Schema({
   titulo: { type: String, required: true },
   descricao: String,
@@ -9,7 +9,6 @@ const FilmeSchema = new mongoose.Schema({
   ano: Number,
   sinopse: String,
   poster: String,
-  favorito: { type: Boolean, default: false }
 });
 
 // 👉 força o Mongoose a usar a coleção "Filmes"
@@ -39,41 +38,26 @@ async function getMovieById(id) {
   }
 }
 
-// Criar novo filme
-async function createMovie(data) {
-  try {
-    return await Filme.create(data);
-  } catch (err) {
-    console.error("Erro ao criar filme:", err);
-    throw err;
-  }
+async function getAllFilmes() {
+  return await Filme.find();
 }
 
-// Editar um filme existente
-async function updateMovie(id, data) {
-  try {
-    return await Filme.findByIdAndUpdate(id, data, { new: true });
-  } catch (err) {
-    console.error("Erro ao atualizar filme:", err);
-    throw err;
-  }
+async function createFilme(data) {
+  return await Filme.create(data);
 }
 
-// Apagar um filme
-async function deleteMovie(id) {
-  try {
-    return await Filme.findByIdAndDelete(id);
-  } catch (err) {
-    console.error("Erro ao deletar filme:", err);
-    throw err;
-  }
+async function updateFilme(id, data) {
+  return await Filme.findByIdAndUpdate(id, data, { new: true });
+}
+
+async function deleteFilme(id) {
+  return await Filme.findByIdAndDelete(id);
 }
 
 module.exports = {
-  Filme,
-  getAllMovies,
-  getMovieById,
-  createMovie,
-  updateMovie,
-  deleteMovie,
+  getAllFilmes,
+  createFilme,
+  updateFilme,
+  deleteFilme,
+  Filme
 };

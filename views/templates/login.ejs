@@ -3,15 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="">
-    <title>PopFlix</title>
+    <title>PopFlix - Login</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
         body {
-			position: relative;
-			overflow: hidden;
-			}
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
+
+        .ball {
+            position: fixed;
+            bottom: -60px;
+            background: rgba(255, 255, 255, 0.20);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: subir 10s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes subir {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(-150vh); opacity: 0; }
+        }
+
         main{
             max-height: 100%;
             overflow: hidden;
@@ -21,94 +38,92 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-        }	
+        }
+
         aside{
             display: flex;
             justify-content: right;
             align-items: center;
-            border-bottom: 10px solid #ccc;
             background-color: #0E0E0E;
-            border: none;
             color: white;
-            box-shadow: 0px px 10px rgba(0, 10, 0, 0.25);
-            transition: background-color 0.3s ease, transform 0.3s ease;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <header>
-        </header>
-        <aside>
-            <!-- Conteúdo do aside, se necessário -->
-        </aside>
+        <header></header>
+
+        <aside></aside>
+
         <main>
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    const body = document.querySelector("body");
-
-                    // Função para gerar uma bolinha
-                    function createBall() {
-                        const ball = document.createElement("div");
-                        ball.classList.add("ball");
-
-                        // Definir tamanho aleatório
-                        const size = Math.random() * 20 + 10 + "px";
-                        ball.style.width = size;
-                        ball.style.height = size;
-
-                        // Posição horizontal aleatória
-                        ball.style.left = Math.random() * 100 + "vw";
-
-                        // Diferentes durações de animação
-                        ball.style.animationDuration = Math.random() * 5 + 8 + "s";
-
-                        body.appendChild(ball);
-
-                        // Remover a bolinha após a animação terminar
-                        setTimeout(() => {
-                            ball.remove();
-                        }, 12000); // Duração um pouco maior que a animação
-                    }
-
-                    // Criar bolinhas continuamente
-                    setInterval(createBall, 500); // Cria uma bolinha a cada 500ms
-                });
-            </script>
             <div class="form-cadastro">
-                <form action="{% url 'login' %}" method="POST">
-					<br>
-					<div class="cadastrese"></div>
-					<br>
-					<div class="imgcadastro">
-						<img src="IMG/logo.png" id="logocadastro" alt="logo">
-					</div>
-					<br>
-					<div class="box">
-						<div class="input-data">
-							<input type="text" name="username" required placeholder=" " />
-							<label>Usuário</label>
-						</div>
-					</div>
-					<div class="box">
-						<div class="input-data">
-							<input type="password" name="password" required placeholder=" " />
-							<label>Senha</label>
-						</div>
-					</div> 
-					<br><br>
-					<input type="submit" id="btcadastro" value="Entrar"><br><br>
-					<div class="esqueci">
-						<a id="esqueci" href="{% url 'esqueci_senha' %}">Esqueci minha senha</a>
-					</div>
-				</form>				
+                <form action="/auth/login" method="POST">
+
+                    <% if (erro) { %>
+                        <p style="color:red;"><%= erro %></p>
+                    <% } %>
+
+                    <div class="imgcadastro">
+                        <img src="/IMG/logo.png" class="logocadastro" id="logocadastro">
+                    </div>
+
+                    <div class="box">
+                        <div class="input-data">
+                            <input type="text" name="username" required placeholder=" "/>
+                            <label>Usuário</label>
+                        </div>
+                    </div>
+
+                    <div class="box">
+                        <div class="input-data">
+                            <input type="password" name="password" required placeholder=" "/>
+                            <label>Senha</label>
+                        </div>
+                    </div>
+
+                    <input type="submit" id="btcadastro" value="Entrar">
+                    <br><br>
+                    <div class="esqueci">
+                        <a href="#">Esqueci minha senha</a>
+                    </div>
+                    <br>
+                    <div class="esqueci">
+                        <a href="/createaccount">Criar uma conta</a>
+                    </div>
+
+                </form>
             </div>
+
         </main>
+
         <footer>
-            <div class="boxfoo">
-                skdnvlksdnv
-            </div>
+            <div class="boxfoo"></div>
         </footer>
     </div>
+
+    <!-- SCRIPT AQUI NO FINAL (CORRETO) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            function createBall() {
+                const ball = document.createElement("div");
+                ball.classList.add("ball");
+
+                const size = Math.random() * 20 + 10 + "px";
+                ball.style.width = size;
+                ball.style.height = size;
+                ball.style.left = Math.random() * 100 + "vw";
+                ball.style.animationDuration = Math.random() * 5 + 8 + "s";
+
+                document.body.appendChild(ball);
+
+                setTimeout(() => ball.remove(), 12000);
+            }
+
+            setInterval(createBall, 500);
+        });
+    </script>
+
 </body>
 </html>

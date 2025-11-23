@@ -76,38 +76,33 @@
                 });
             </script>
             <div class="form-cadastro">
-                <form action="{% url 'login' %}" method="POST">
-					<br>
-					<div class="cadastrese"></div>
-					<br>
-					<div class="imgcadastro">
-						<img src="IMG/logo.png" id="logocadastro" alt="logo">
-					</div>
-					<br>
-					<div class="box">
-						<div class="input-data">
-							<input type="text" name="username" required placeholder=" " />
-							<label>Usuário</label>
-						</div>
-					</div>
+                <form action="/auth/register" method="POST">
+                    <% if (erro) { %>
+                    <p style="color:red;"><%= erro %></p>
+                    <% } %>
+                    <div class="imgcadastro">
+                    <img src="/IMG/logo.png" class="logocadastro" id="logocadastro">
+                    </div>
                     <div class="box">
-						<div class="input-data">
-							<input type="text" name="username" required placeholder=" " />
-							<label>E-mail</label>
-						</div>
-					</div>
-					<div class="box">
-						<div class="input-data">
-							<input type="password" name="password" required placeholder=" " />
-							<label>Senha</label>
-						</div>
-					</div> 
-					<br>
-					<input type="submit" id="btcadastro" value="Criar Conta "><br><br>
-                    <div class="esqueci">
-						<a id="esqueci" href="{% url 'esqueci_senha' %}">Já tem uma conta no PopFlix? Faça login.</a>
-					</div>
-				</form>				
+                        <div class="input-data">
+                            <input type="text" name="nome" required placeholder=" " />
+                            <label>Nome</label>
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="input-data">
+                            <input type="email" name="email" required placeholder=" " />
+                            <label>Email</label>
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="input-data">
+                            <input type="password" name="senha" required placeholder=" " />
+                            <label>Senha</label>
+                        </div>
+                    </div>
+                    <input type="submit" id="btcadastro" value="Cadastrar">
+                </form>		
             </div>
         </main>
         <footer>

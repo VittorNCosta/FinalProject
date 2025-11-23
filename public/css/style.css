@@ -83,17 +83,15 @@ html, body{
 		display: flex;
 		align-items: center;
 		justify-self: center;
-	}
-	.form-cadastro{
-		width: 40ch;
+		width: 38ch;
 		height:auto;
 		border-radius: 3%;
-		background-image: url('/views/static/IMG/fundo_form.png');
+		background-image: url('/IMG/fundo_form.png');
 		background-size: cover;        /* Faz a imagem cobrir toda a div */
 		background-position: center;   /* Centraliza a imagem */
 		background-repeat: no-repeat;  /* Evita repetição da imagem */
 		margin: 0;
-		padding: 0;
+		padding: 20px;
 		display: flex;
 		align-items: center;
 		justify-self: center;
