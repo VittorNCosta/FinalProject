@@ -238,6 +238,7 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>Imagem</th> <!-- NOVA COLUNA -->
                             <th>Usuário</th>
                             <th>E-mail</th>
                             <th>Senha</th>
@@ -298,6 +299,15 @@
                 <input id="usuarioNome" type="text" placeholder="Nome de Usuário">
                 <input id="usuarioEmail" type="email" placeholder="E-mail">
                 <input id="usuarioSenha" type="password" placeholder="Senha">
+
+                        <!-- ADICIONE ESTA PARTE PARA A IMAGEM -->
+        <div class="form-group">
+            <label for="usuarioImagem" style="display: block; margin-bottom: 5px; font-weight: bold;">Imagem do Perfil:</label>
+            <input type="file" id="usuarioImagem" name="imagem" accept="image/*" class="form-control" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+            <button type="button" id="removerImagem" class="btn btn-secondary btn-sm" style="display: none; background: #6c757d; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Remover Imagem</button>
+        </div>
+        <div id="imagemPreview" class="mt-2" style="display: none; text-align: center;"></div>
+        <!-- FIM DA ADIÇÃO -->
                 <div class="popup-buttons">
                     <button class="cancel-btn" data-popup-cancel="popupUsuario">Cancelar</button>
                     <button class="save-btn" id="btnSalvarUsuario">Salvar</button>
@@ -448,13 +458,20 @@
         const btnSalvarUsuario = document.getElementById("btnSalvarUsuario");
         const tituloPopupUsuario = document.getElementById("tituloPopupUsuario");
 
+        // Elementos para preview da imagem
+        const imagemPreview = document.getElementById("imagemPreview");
+        const imagemInput = document.getElementById("usuarioImagem");
+        const removerImagemBtn = document.getElementById("removerImagem");
+
+
+
         function limparFormularioUsuario() {
             document.getElementById("usuarioId").value    = "";
             document.getElementById("usuarioNome").value  = "";
             document.getElementById("usuarioEmail").value = "";
             document.getElementById("usuarioSenha").value = "";
         }
-
+/*
         if (btnAddUsuario) {
             btnAddUsuario.addEventListener("click", () => {
                 modoUsuario = "criar";
@@ -473,11 +490,59 @@
                 }
             });
         }
+*/
+
+        // Preview da imagem
+if (imagemInput) {
+    imagemInput.addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagemPreview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width: 100px; max-height: 100px; border-radius: 5px;">`;
+                imagemPreview.style.display = "block";
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+
+// Remover imagem
+if (removerImagemBtn) {
+    removerImagemBtn.addEventListener("click", function() {
+        imagemPreview.innerHTML = "";
+        imagemPreview.style.display = "none";
+        imagemInput.value = "";
+    });
+}
+
+if (btnAddUsuario) {
+    btnAddUsuario.addEventListener("click", () => {
+        modoUsuario = "criar";
+        tituloPopupUsuario.textContent = "Adicionar Usuário";
+        limparFormularioUsuario();
+        abrirPopup("popupUsuario");
+    });
+}
+
+if (btnSalvarUsuario) {
+    btnSalvarUsuario.addEventListener("click", async () => {
+        if (modoUsuario === "criar") {
+            await salvarUsuario();
+        } else {
+            await salvarEdicaoUsuario();
+        }
+    });
+}
+
 
         async function salvarUsuario() {
             const nome  = document.getElementById("usuarioNome").value.trim();
             const email = document.getElementById("usuarioEmail").value.trim();
             const senha = document.getElementById("usuarioSenha").value.trim();
+            const imagem = document.getElementById("usuarioImagem").files[0];
+
 
             if (!nome || !email || !senha) {
                 alert("Preencha nome, e-mail e senha.");
@@ -495,13 +560,21 @@
                 return;
             }
 
-            const data = { nome, email, senha };
+            const formData = new FormData();
+    formData.append("nome", nome);
+    formData.append("email", email);
+    formData.append("senha", senha);
+    if (imagem) {
+        formData.append("imagem", imagem);
+    }
+
+            /*const data = { nome, email, senha };*/
 
             try {
                 const response = await fetch("/users", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
+                    /*headers: { "Content-Type": "application/json" },*/
+                    body: formData
                 });
 
                 const result = await response.json();
@@ -537,24 +610,32 @@
                 }
 
                 users.forEach(user => {
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
-                        <td>${user.nome}</td>
-                        <td>${user.email}</td>
-                        <td>••••••••</td>
-                        <td>
-                            <button class="btn-editar-usuario" data-id="${user._id}">Editar</button>
-                            <button class="btn-deletar-usuario" data-id="${user._id}">Excluir</button>
-                        </td>
-                    `;
-                    tbodyUsuarios.appendChild(tr);
-                });
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>
+                    ${user.imagem ? 
+                        `<img src="${user.imagem}" alt="${user.nome}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">` : 
+                        `<div style="width: 40px; height: 40px; border-radius: 50%; background: #ccc; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 12px;">Sem foto</span>
+                        </div>`
+                    }
+                </td>
+                <td>${user.nome}</td>
+                <td>${user.email}</td>
+                <td>••••••••</td>
+                <td>
+                    <button class="btn-editar-usuario" data-id="${user._id}">Editar</button>
+                    <button class="btn-deletar-usuario" data-id="${user._id}">Excluir</button>
+                </td>
+            `;
+            tbodyUsuarios.appendChild(tr);
+        });
 
-            } catch (err) {
-                console.error(err);
-                tbodyUsuarios.innerHTML = "<tr><td colspan='4'>Erro ao carregar usuários.</td></tr>";
-            }
-        }
+    } catch (err) {
+        console.error(err);
+        tbodyUsuarios.innerHTML = "<tr><td colspan='5'>Erro ao carregar usuários.</td></tr>";
+    }
+}
 
         // Delegação de eventos para editar/deletar usuário
         if (tbodyUsuarios) {
@@ -572,58 +653,80 @@
         }
 
         async function editarUsuario(id) {
-            try {
-                const response = await fetch(`/users/${id}`);
-                const user = await response.json();
+    try {
+        const response = await fetch(`/users/${id}`);
+        const user = await response.json();
 
-                document.getElementById("usuarioId").value    = user._id;
-                document.getElementById("usuarioNome").value  = user.nome || "";
-                document.getElementById("usuarioEmail").value = user.email || "";
-                document.getElementById("usuarioSenha").value = "";
+        document.getElementById("usuarioId").value    = user._id;
+        document.getElementById("usuarioNome").value  = user.nome || "";
+        document.getElementById("usuarioEmail").value = user.email || "";
+        document.getElementById("usuarioSenha").value = "";
 
-                modoUsuario = "editar";
-                tituloPopupUsuario.textContent = "Editar Usuário";
-                abrirPopup("popupUsuario");
-            } catch (err) {
-                console.error(err);
-                alert("Erro ao carregar usuário para edição.");
-            }
+        // Carregar imagem atual se existir
+        if (user.imagem) {
+            imagemPreview.innerHTML = `<img src="${user.imagem}" alt="Preview" style="max-width: 100px; max-height: 100px; border-radius: 5px;">
+                                      <input type="hidden" name="imagemAtual" value="${user.imagem}">`;
+            imagemPreview.style.display = "block";
+        } else {
+            imagemPreview.innerHTML = "";
+            imagemPreview.style.display = "none";
         }
+        imagemInput.value = "";
+
+        modoUsuario = "editar";
+        tituloPopupUsuario.textContent = "Editar Usuário";
+        abrirPopup("popupUsuario");
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao carregar usuário para edição.");
+    }
+}
 
         async function salvarEdicaoUsuario() {
-            const id    = document.getElementById("usuarioId").value;
-            const nome  = document.getElementById("usuarioNome").value.trim();
-            const email = document.getElementById("usuarioEmail").value.trim();
-            const senha = document.getElementById("usuarioSenha").value.trim();
+    const id    = document.getElementById("usuarioId").value;
+    const nome  = document.getElementById("usuarioNome").value.trim();
+    const email = document.getElementById("usuarioEmail").value.trim();
+    const senha = document.getElementById("usuarioSenha").value.trim();
+    const imagem = document.getElementById("usuarioImagem").files[0];
 
-            if (!nome || !email || !senha) {
-                alert("Todos os campos são obrigatórios!");
-                return;
-            }
+    // CORREÇÃO: Senha NÃO é obrigatória na edição
+    if (!nome || !email) {
+        alert("Nome e e-mail são obrigatórios!");
+        return;
+    }
 
-            try {
-                const response = await fetch(`/users/${id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ nome, email, senha })
-                });
+    const formData = new FormData();
+    formData.append("nome", nome);
+    formData.append("email", email);
+    if (senha) {
+        formData.append("senha", senha);
+    }
+    if (imagem) {
+        formData.append("imagem", imagem);
+    }
 
-                const result = await response.json();
+    try {
+        const response = await fetch(`/users/${id}`, {
+            method: "PUT",
+            body: formData
+        });
 
-                if (!response.ok) {
-                    alert(result.error || "Erro ao atualizar.");
-                    return;
-                }
+        const result = await response.json();
 
-                alert("Usuário atualizado!");
-                fecharPopup("popupUsuario");
-                carregarUsuarios();
-
-            } catch (error) {
-                console.error(error);
-                alert("Erro ao atualizar usuário.");
-            }
+        if (!response.ok) {
+            alert(result.error || "Erro ao atualizar.");
+            return;
         }
+
+        alert("Usuário atualizado!");
+        fecharPopup("popupUsuario");
+        carregarUsuarios();
+
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao atualizar usuário.");
+    }
+}
 
         async function deletarUsuario(id) {
             if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
