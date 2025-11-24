@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PopFlix - Login</title>
+    <title>PopFlix - Nova senha</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -12,6 +12,21 @@
             position: relative;
             overflow-x: hidden;
             overflow-y: hidden;
+        }
+
+        .ball {
+            position: fixed;
+            bottom: -60px;
+            background: rgba(255, 255, 255, 0.20);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: subir 10s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes subir {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(-150vh); opacity: 0; }
         }
 
         main{
@@ -43,43 +58,46 @@
 
         <main>
             <div class="form-cadastro">
-                <form action="/auth/login" method="POST">
+                <!-- token vem da rota: /resetar-senha/:token -->
+                <form action="/resetar-senha/<%= token %>" method="POST">
 
                     <% if (erro) { %>
                         <p style="color:red;"><%= erro %></p>
+                    <% } %>
+
+                    <% if (sucesso) { %>
+                        <p style="color:rgb(0, 255, 0);"><%= sucesso %></p>
                     <% } %>
 
                     <div class="imgcadastro">
                         <img src="/IMG/logo.png" class="logocadastro" id="logocadastro">
                     </div>
 
-                    <div class="box">
-                        <div class="input-data">
-                            <input type="text" name="username" required placeholder=" "/>
-                            <label>Usuário</label>
-                        </div>
-                    </div>
+                    <h2 style="margin-bottom: 20px;">Definir nova senha</h2>
 
                     <div class="box">
                         <div class="input-data">
                             <input type="password" name="password" required placeholder=" "/>
-                            <label>Senha</label>
+                            <label>Nova senha</label>
                         </div>
                     </div>
 
-                    <input type="submit" id="btcadastro" value="Entrar">
+                    <div class="box">
+                        <div class="input-data">
+                            <input type="password" name="confirmPassword" required placeholder=" "/>
+                            <label>Confirmar senha</label>
+                        </div>
+                    </div>
+
+                    <input type="submit" id="btcadastro" value="Salvar nova senha">
+
                     <br><br>
                     <div class="esqueci">
-                        <a href="/esqueci-senha">Esqueci minha senha</a>
-                    </div>
-                    <br>
-                    <div class="esqueci">
-                        <a href="/createaccount">Criar uma conta</a>
+                        <a href="/login">Ir para o login</a>
                     </div>
 
                 </form>
             </div>
-
         </main>
 
         <footer>
@@ -87,7 +105,6 @@
         </footer>
     </div>
 
-    <!-- SCRIPT AQUI NO FINAL (CORRETO) -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
 

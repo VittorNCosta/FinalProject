@@ -1,4 +1,3 @@
-
 {
   "name": "popflix",
   "version": "1.0.0",
@@ -18,6 +17,7 @@
     "helmet": "^8.1.0",
     "mongoose": "^8.20.0",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.10",
     "open": "^11.0.0"
   }
 }

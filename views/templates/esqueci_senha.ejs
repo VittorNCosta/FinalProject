@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PopFlix - Login</title>
+    <title>PopFlix - Esqueci minha senha</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -13,7 +13,6 @@
             overflow-x: hidden;
             overflow-y: hidden;
         }
-
         main{
             max-height: 100%;
             overflow: hidden;
@@ -43,34 +42,34 @@
 
         <main>
             <div class="form-cadastro">
-                <form action="/auth/login" method="POST">
+                <form action="/esqueci-senha" method="POST">
 
                     <% if (erro) { %>
                         <p style="color:red;"><%= erro %></p>
+                    <% } %>
+
+                    <% if (sucesso) { %>
+                        <p style="color:rgb(0, 255, 0);"><%= sucesso %></p>
                     <% } %>
 
                     <div class="imgcadastro">
                         <img src="/IMG/logo.png" class="logocadastro" id="logocadastro">
                     </div>
 
-                    <div class="box">
-                        <div class="input-data">
-                            <input type="text" name="username" required placeholder=" "/>
-                            <label>Usuário</label>
-                        </div>
-                    </div>
+                    <h2 style="margin-bottom: 20px;">Recuperar senha</h2>
 
                     <div class="box">
                         <div class="input-data">
-                            <input type="password" name="password" required placeholder=" "/>
-                            <label>Senha</label>
+                            <input type="email" name="email" required placeholder=" "/>
+                            <label>E-mail cadastrado</label>
                         </div>
                     </div>
 
-                    <input type="submit" id="btcadastro" value="Entrar">
+                    <input type="submit" id="btcadastro" value="Enviar link de recuperação">
+
                     <br><br>
                     <div class="esqueci">
-                        <a href="/esqueci-senha">Esqueci minha senha</a>
+                        <a href="/login">Voltar para o login</a>
                     </div>
                     <br>
                     <div class="esqueci">
@@ -79,7 +78,6 @@
 
                 </form>
             </div>
-
         </main>
 
         <footer>
@@ -87,7 +85,6 @@
         </footer>
     </div>
 
-    <!-- SCRIPT AQUI NO FINAL (CORRETO) -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
 
