@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer"); // ADICIONAR ESTA LINHA
+const path = require("path"); // ADICIONAR ESTA LINHA
+const fs = require("fs"); // ADICIONAR ESTA LINHA
 
 const {
   User,
@@ -16,6 +19,45 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 
 const { autenticacaoLogin, autenticacaoAdmin } = require("../middleware/auth");
+
+
+
+// ==========================
+// Configuração do Multer para upload de imagens
+// ==========================
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '../public/uploads/usuarios');
+    // Criar diretório se não existir
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Nome único para o arquivo
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'usuario-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  },
+  fileFilter: function (req, file, cb) {
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Apenas imagens são permitidas'));
+    }
+  }
+});
 
 // ==========================
 // Função de validação
@@ -56,7 +98,8 @@ router.get("/users", async (req, res) => {
 });
 
 // Criar usuário
-router.post("/users", async (req, res) => {
+// Criar usuário COM UPLOAD DE IMAGEM - CORRIGIDO
+router.post("/users", upload.single('imagem'), async (req, res) => {
   try {
     const validacao = validarCampos(["nome", "email", "senha"], req.body);
     if (!validacao.ok) return res.status(400).json({ error: validacao.mensagem });
@@ -67,9 +110,24 @@ router.post("/users", async (req, res) => {
 
     if (existe) return res.status(409).json({ error: "Email ou nome já cadastrado." });
 
-    const novo = await createUser(req.body);
+    const userData = {
+      nome: req.body.nome,
+      email: req.body.email,
+      senha: req.body.senha
+    };
+
+    // Se há imagem upload, adiciona ao userData
+    if (req.file) {
+      userData.imagem = `/uploads/usuarios/${req.file.filename}`;
+    }
+
+    const novo = await createUser(userData);
     res.status(201).json(sanitizeUser(novo));
   } catch (err) {
+    // Remove arquivo se houve erro
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
     res.status(500).json({ error: "Erro ao criar usuário." });
   }
 });
@@ -86,27 +144,66 @@ router.get("/users/:id", async (req, res) => {
 });
 
 // Atualizar usuário
-router.put("/users/:id", async (req, res) => {
+// Atualizar usuário com imagem
+router.put("/users/:id", upload.single('imagem'), async (req, res) => {
   try {
-    const validacao = validarCampos(["nome", "email", "senha"], req.body);
+    const validacao = validarCampos(["nome", "email"], req.body);
     if (!validacao.ok) return res.status(400).json({ error: validacao.mensagem });
 
-    const atualizado = await updateUser(req.params.id, req.body);
+    const userData = {
+      nome: req.body.nome,
+      email: req.body.email
+    };
+
+    // Se senha foi fornecida, adiciona ao userData
+    if (req.body.senha && req.body.senha.trim() !== "") {
+      userData.senha = req.body.senha;
+    }
+
+    // Se há nova imagem upload, adiciona ao userData
+    if (req.file) {
+      userData.imagem = `/uploads/usuarios/${req.file.filename}`;
+
+      // Remove imagem antiga se existir
+      const userAntigo = await User.findById(req.params.id);
+      if (userAntigo && userAntigo.imagem) {
+        const oldImagePath = path.join(__dirname, '../public', userAntigo.imagem);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+    }
+
+    const atualizado = await updateUser(req.params.id, userData);
 
     if (!atualizado)
       return res.status(404).json({ error: "Usuário não encontrado." });
 
     res.json(sanitizeUser(atualizado));
   } catch (err) {
+    // Remove arquivo se houve erro
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
     res.status(500).json({ error: "Erro ao atualizar usuário." });
   }
 });
 
-// Deletar usuário
+// Deletar usuário (também remove a imagem)
 router.delete("/users/:id", async (req, res) => {
   try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: "Usuário não encontrado." });
+
+    // Remove imagem se existir
+    if (user.imagem) {
+      const imagePath = path.join(__dirname, '../public', user.imagem);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
     const deletado = await deleteUser(req.params.id);
-    if (!deletado) return res.status(404).json({ error: "Usuário não encontrado." });
     res.json({ message: "Usuário excluído com sucesso." });
   } catch (err) {
     res.status(500).json({ error: "Erro ao excluir usuário." });
@@ -161,7 +258,7 @@ router.post("/auth/login", async (req, res) => {
 // ==========================
 // REGISTRO
 // ==========================
-router.post("/auth/register", async (req, res) => {
+router.post("/auth/register", upload.single('imagem'), async (req, res) => {
   try {
     const { nome, email, senha } = req.body;
 
@@ -178,16 +275,27 @@ router.post("/auth/register", async (req, res) => {
         erro: "Email ou nome já cadastrado."
       });
 
-    await createUser({
+    const userData = {
       nome,
       email: email.toLowerCase(),
       senha,
       funcao: "user"
-    });
+    };
+
+    // Se há imagem upload, adiciona ao userData
+    if (req.file) {
+      userData.imagem = `/uploads/usuarios/${req.file.filename}`;
+    }
+
+    await createUser(userData);
 
     return res.redirect("/login");
   } catch (err) {
     console.error("Erro /auth/register:", err);
+    // Remove arquivo se houve erro
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
     return res.render("templates/createaccount", {
       erro: "Erro ao registrar usuário."
     });

@@ -14,6 +14,10 @@ const UserSchema = new mongoose.Schema(
     nome: String,
     email: String,
     senha: String,
+    imagem: {  // ADICIONE ESTE CAMPO
+      type: String,
+      default: null
+    },
     resetToken: String,
     resetTokenExpira: Date,
     funcao: { type: String, enum: ["user", "admin"], default: "user" }, // autorização
