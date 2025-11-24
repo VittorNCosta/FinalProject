@@ -13,8 +13,9 @@ const UserSchema = new mongoose.Schema(
   {
     nome: String,
     email: String,
-    idade: Number,
-    senha: String, // armazenará o hash (os hooks cuidam disso)
+    senha: String,
+    resetToken: String,
+    resetTokenExpira: Date,
     funcao: { type: String, enum: ["user", "admin"], default: "user" }, // autorização
   },
   {

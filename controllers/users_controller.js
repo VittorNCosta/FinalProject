@@ -11,6 +11,10 @@ const {
   getUserByEmail
 } = require("../models/users_model");
 
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
+
 const { autenticacaoLogin, autenticacaoAdmin } = require("../middleware/auth");
 
 // ==========================
@@ -124,7 +128,6 @@ router.post("/auth/login", async (req, res) => {
       });
     }
 
-    // Buscar por email ou nome
     const query = loginId.includes("@")
       ? { email: loginId.toLowerCase() }
       : { nome: loginId };
@@ -144,7 +147,6 @@ router.post("/auth/login", async (req, res) => {
       });
     }
 
-    // Criar sessão
     req.session.userId = usuario._id.toString();
     req.session.username = usuario.nome;
     req.session.funcao = usuario.funcao;
@@ -176,7 +178,6 @@ router.post("/auth/register", async (req, res) => {
         erro: "Email ou nome já cadastrado."
       });
 
-    // Criar usuário com hash automático (feito no model)
     await createUser({
       nome,
       email: email.toLowerCase(),
@@ -204,6 +205,155 @@ router.get("/auth/logout", (req, res) => {
     res.clearCookie("connect.sid");
     return res.redirect("/login");
   });
+});
+
+// ==========================
+// ESQUECI MINHA SENHA
+// ==========================
+
+// Página de formulário
+router.get("/esqueci-senha", (req, res) => {
+  res.render("templates/esqueci_senha", { erro: null, sucesso: null });
+});
+
+// Enviar link
+router.post("/esqueci-senha", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.render("templates/esqueci_senha", {
+        erro: "E-mail não encontrado.",
+        sucesso: null
+      });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    user.resetToken = token;
+    user.resetTokenExpira = Date.now() + 3600000; // 1 hora
+    await user.save();
+
+    const link = `http://localhost:8088/resetar-senha/${token}`;
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "livramentolucas182@gmail.com",
+        pass: "smdqbyclojomxruq"
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+
+    transporter.verify((error, success) => {
+      if (error) {
+        console.log("Erro SMTP:", error);
+      } else {
+        console.log("SMTP funcionando! Pronto para enviar.");
+      }
+    });
+
+    await transporter.sendMail({
+      from: "PopFlix <no-reply@popflix.com>",
+      to: email,
+      subject: "Redefinição de Senha - PopFlix",
+      html: `
+        <h3>Redefinir sua senha</h3>
+        <p>Clique no link abaixo:</p>
+        <a href="${link}">${link}</a>
+        <p>Validade: 1 hora</p>
+      `
+    });
+
+    res.render("templates/esqueci_senha", {
+      erro: null,
+      sucesso: "Um link foi enviado para seu e-mail!"
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.render("templates/esqueci_senha", {
+      erro: "Erro ao enviar e-mail.",
+      sucesso: null
+    });
+  }
+});
+
+// ==========================
+// NOVA SENHA (GET)
+// ==========================
+router.get("/resetar-senha/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpira: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.send("Link inválido ou expirado.");
+    }
+
+    res.render("templates/nova_senha", {
+      token,
+      erro: null,
+      sucesso: null
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.send("Erro ao carregar página.");
+  }
+});
+
+// ==========================
+// SALVAR NOVA SENHA (POST)
+// ==========================
+router.post("/resetar-senha/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password, confirmPassword } = req.body;
+
+    if (password !== confirmPassword) {
+      return res.render("templates/nova_senha", {
+        token,
+        erro: "As senhas não coincidem!",
+        sucesso: null
+      });
+    }
+
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpira: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.send("Token inválido ou expirado.");
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+
+    user.senha = hash;
+    user.resetToken = undefined;
+    user.resetTokenExpira = undefined;
+
+    await user.save();
+
+    return res.render("templates/nova_senha", {
+      token,
+      erro: null,
+      sucesso: "Senha redefinida! Faça login."
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.send("Erro ao salvar nova senha.");
+  }
 });
 
 module.exports = router;
